@@ -128,8 +128,14 @@ public class CoordinateSearchResponse extends SearchResponse {
 
   @Override
   public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
+    builder.startObject();
+
     coordinateSearchMetadata.toXContent(builder);
-    return this.searchResponse.toXContent(builder, params);
+    this.searchResponse.innerToXContent(builder, params);
+
+    builder.endObject();
+
+    return builder;
   }
 
   @Override

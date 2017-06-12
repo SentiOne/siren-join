@@ -162,6 +162,8 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
 
   @Override
   public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
+    builder.startObject();
+
     builder.startArray(Fields.RESPONSES);
     for (Item item : items) {
       if (item.isFailure()) {
@@ -169,12 +171,13 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
         builder.field(Fields.ERROR, item.getFailureMessage());
         builder.endObject();
       } else {
-        builder.startObject();
         item.getResponse().toXContent(builder, params);
-        builder.endObject();
       }
     }
     builder.endArray();
+
+    builder.endObject();
+
     return builder;
   }
 

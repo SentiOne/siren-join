@@ -20,16 +20,18 @@ package solutions.siren.join;
 
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.Module;
-import org.elasticsearch.common.settings.Setting;
-import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.*;
 import org.elasticsearch.index.IndexModule;
 import org.elasticsearch.index.shard.IndexingOperationListener;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
+import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
 import solutions.siren.join.action.admin.cache.ClearFilterJoinCacheAction;
 import solutions.siren.join.action.admin.cache.StatsFilterJoinCacheAction;
@@ -55,6 +57,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * The SIREn Join plugin.
@@ -112,9 +115,15 @@ public class SirenJoinPlugin extends Plugin implements ActionPlugin, SearchPlugi
   }
 
   @Override
-  public List<Class<? extends RestHandler>> getRestHandlers() {
-    return Arrays.asList(RestCoordinateSearchAction.class, RestCoordinateMultiSearchAction.class,
-      RestClearFilterJoinCacheAction.class, RestStatsFilterJoinCacheAction.class);
+  public List<RestHandler> getRestHandlers(Settings settings, RestController restController, ClusterSettings clusterSettings,
+                                          IndexScopedSettings indexScopedSettings, SettingsFilter settingsFilter,
+                                          IndexNameExpressionResolver indexNameExpressionResolver, Supplier<DiscoveryNodes> nodesInCluster) {
+    return Arrays.asList(
+      new RestCoordinateSearchAction(settings, restController),
+      new RestCoordinateMultiSearchAction(settings, restController),
+      new RestClearFilterJoinCacheAction(settings, restController),
+      new RestStatsFilterJoinCacheAction(settings, restController)
+    );
   }
 
   @Override

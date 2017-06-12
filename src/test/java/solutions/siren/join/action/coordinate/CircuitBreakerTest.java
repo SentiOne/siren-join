@@ -97,7 +97,7 @@ public class CircuitBreakerTest extends SirenJoinTestCase {
             ).termsEncoding(TermsByQueryRequest.TermsEncoding.LONG)
     );
     assertFailures(searchRequest, RestStatus.INTERNAL_SERVER_ERROR,
-            containsString("Data too large, data for [<terms_set>] would be larger than limit of [8/8b]"));
+            containsString("Data too large, data for [<terms_set>] would be [40/40b], which is larger than the limit of [8/8b]"));
 
     NodesStatsResponse stats = client().admin().cluster().prepareNodesStats().setBreaker(true).get();
     int breaks = 0;
@@ -122,7 +122,7 @@ public class CircuitBreakerTest extends SirenJoinTestCase {
             ).termsEncoding(TermsByQueryRequest.TermsEncoding.LONG)
     );
     assertFailures(searchRequest, RestStatus.INTERNAL_SERVER_ERROR,
-            containsString("Data too large, data for [<terms_set>] would be larger than limit of [60/60b]"));
+            containsString("Data too large, data for [<terms_set>] would be [80/80b], which is larger than the limit of [60/60b]"));
 
     NodesStatsResponse stats = client().admin().cluster().prepareNodesStats().setBreaker(true).get();
     int breaks = 0;

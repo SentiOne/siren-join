@@ -23,14 +23,14 @@ import org.elasticsearch.action.support.nodes.BaseNodesResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatsFilterJoinCacheResponse extends BaseNodesResponse<StatsFilterJoinCacheNodeResponse> implements ToXContent {
+public class StatsFilterJoinCacheResponse extends BaseNodesResponse<StatsFilterJoinCacheNodeResponse> implements ToXContentObject {
 
   StatsFilterJoinCacheResponse() {}
 
@@ -59,6 +59,8 @@ public class StatsFilterJoinCacheResponse extends BaseNodesResponse<StatsFilterJ
 
   @Override
   public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
+    builder.startObject();
+
     builder.field("cluster_name", getClusterName().value());
 
     builder.startObject("nodes");
@@ -83,6 +85,7 @@ public class StatsFilterJoinCacheResponse extends BaseNodesResponse<StatsFilterJ
     }
     builder.endObject();
 
+    builder.endObject();
     return builder;
   }
 

@@ -22,7 +22,6 @@ import org.elasticsearch.action.support.broadcast.TransportBroadcastAction;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.ParseFieldMatcher;
 import org.elasticsearch.common.breaker.CircuitBreaker;
 import org.elasticsearch.common.util.PageCacheRecycler;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
@@ -30,7 +29,6 @@ import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
-import org.elasticsearch.search.SearchRequestParsers;
 import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.internal.AliasFilter;
 import org.elasticsearch.tasks.Task;
@@ -260,7 +258,7 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
         try {
           queryParser = XContentFactory.xContent(querySource).createParser(indexService.xContentRegistry(), querySource);
           context.getQueryShardContext().setTypes(request.types());
-          ParsedQuery parsedQuery = orderByOperation.getParsedQuery(queryParser, parseFieldMatcher, context.getQueryShardContext());
+          ParsedQuery parsedQuery = orderByOperation.getParsedQuery(queryParser, context.getQueryShardContext());
           if (parsedQuery != null) {
             context.parsedQuery(parsedQuery);
           }
@@ -329,8 +327,8 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
     /**
      * Returns the {@link ParsedQuery} associated to this order by operation.
      */
-    protected ParsedQuery getParsedQuery(final XContentParser queryParser, final ParseFieldMatcher parseFieldMatcher, final QueryShardContext queryShardContext) throws IOException {
-      QueryParseContext context = new QueryParseContext(queryParser, parseFieldMatcher);
+    protected ParsedQuery getParsedQuery(final XContentParser queryParser, final QueryShardContext queryShardContext) throws IOException {
+      QueryParseContext context = new QueryParseContext(queryParser);
       Optional<QueryBuilder> queryBuilder = context.parseInnerQueryBuilder();
       return queryBuilder.isPresent() ? new ParsedQuery(queryBuilder.get().toQuery(queryShardContext)) : null;
     }

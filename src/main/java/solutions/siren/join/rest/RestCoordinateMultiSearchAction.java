@@ -31,7 +31,6 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestActions;
 import org.elasticsearch.rest.action.RestToXContentListener;
 import org.elasticsearch.rest.action.search.RestMultiSearchAction;
-import org.elasticsearch.search.SearchRequestParsers;
 import solutions.siren.join.action.coordinate.CoordinateMultiSearchAction;
 
 import java.io.IOException;
@@ -42,10 +41,9 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 public class RestCoordinateMultiSearchAction extends BaseRestHandler {
 
   private final boolean allowExplicitIndex;
-  private final SearchRequestParsers searchRequestParsers;
 
   @Inject
-  public RestCoordinateMultiSearchAction(final Settings settings, final RestController controller, SearchRequestParsers searchRequestParsers) {
+  public RestCoordinateMultiSearchAction(final Settings settings, final RestController controller) {
     super(settings);
     controller.registerHandler(GET, "/_coordinate_msearch", this);
     controller.registerHandler(POST, "/_coordinate_msearch", this);
@@ -55,12 +53,11 @@ public class RestCoordinateMultiSearchAction extends BaseRestHandler {
     controller.registerHandler(POST, "/{index}/{type}/_coordinate_msearch", this);
 
     this.allowExplicitIndex = settings.getAsBoolean("rest.action.multi.allow_explicit_index", true);
-    this.searchRequestParsers = searchRequestParsers;
   }
 
   @Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
-    MultiSearchRequest multiSearchRequest = RestMultiSearchAction.parseRequest(request, allowExplicitIndex, searchRequestParsers, parseFieldMatcher);
+    MultiSearchRequest multiSearchRequest = RestMultiSearchAction.parseRequest(request, allowExplicitIndex);
     return channel -> client.execute(CoordinateMultiSearchAction.INSTANCE, multiSearchRequest, new RestToXContentListener<>(channel));
   }
 

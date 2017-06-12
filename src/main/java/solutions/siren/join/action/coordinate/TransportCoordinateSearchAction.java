@@ -30,7 +30,6 @@ import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.search.SearchRequestParsers;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import solutions.siren.join.action.admin.cache.FilterJoinCacheService;
@@ -51,11 +50,10 @@ public class TransportCoordinateSearchAction extends BaseTransportCoordinateSear
   public TransportCoordinateSearchAction(Settings settings, ThreadPool threadPool,
                                          TransportService transportService, FilterJoinCacheService cacheService,
                                          ActionFilters actionFilters, TransportSearchAction searchAction,
-                                         SearchRequestParsers searchRequestParsers,
                                          IndexNameExpressionResolver indexNameExpressionResolver, Client client,
                                          NamedXContentRegistry xContentRegistry) {
     super(settings, CoordinateSearchAction.NAME, threadPool, transportService, actionFilters,
-            indexNameExpressionResolver, searchRequestParsers, client, xContentRegistry, SearchRequest::new);
+            indexNameExpressionResolver, client, xContentRegistry, SearchRequest::new);
     this.searchAction = searchAction;
     this.cacheService = cacheService;
   }

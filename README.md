@@ -1,3 +1,7 @@
+# Branch info
+
+When having problem with jna when running tests use -Djna.nosys=true
+
 # SIREn Join Plugin for Elasticsearch
 
 This plugin extends Elasticsearch with new search actions and a filter query parser that enables to perform

@@ -30,7 +30,6 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
 import org.elasticsearch.rest.action.admin.indices.RestTypesExistsAction;
 import org.elasticsearch.rest.action.search.RestSearchAction;
-import org.elasticsearch.search.SearchRequestParsers;
 import solutions.siren.join.action.coordinate.CoordinateSearchAction;
 
 import java.io.IOException;
@@ -40,10 +39,8 @@ import static org.elasticsearch.rest.RestRequest.Method.POST;
 
 public class RestCoordinateSearchAction extends BaseRestHandler {
 
-  private final SearchRequestParsers searchRequestParsers;
-
   @Inject
-  public RestCoordinateSearchAction(final Settings settings, final RestController controller, final SearchRequestParsers searchRequestParsers) {
+  public RestCoordinateSearchAction(final Settings settings, final RestController controller) {
     super(settings);
     controller.registerHandler(GET, "/_coordinate_search", this);
     controller.registerHandler(POST, "/_coordinate_search", this);
@@ -67,14 +64,13 @@ public class RestCoordinateSearchAction extends BaseRestHandler {
     controller.registerHandler(GET, "/{index}/{type}/_coordinate_search/exists", this);
     controller.registerHandler(POST, "/{index}/{type}/_coordinate_search/exists", this);
 
-    this.searchRequestParsers = searchRequestParsers;
   }
 
   @Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
     SearchRequest searchRequest = new SearchRequest();
     request.withContentOrSourceParamParserOrNull(parser ->
-      RestSearchAction.parseSearchRequest(searchRequest, request, searchRequestParsers, parseFieldMatcher, parser)
+			 RestSearchAction.parseSearchRequest(searchRequest, request, parser)
 		);
 
     return channel -> client.execute(CoordinateSearchAction.INSTANCE, searchRequest, new RestStatusToXContentListener<>(channel));

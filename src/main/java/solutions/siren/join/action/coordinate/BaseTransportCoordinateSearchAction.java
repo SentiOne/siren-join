@@ -34,7 +34,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.search.SearchModule;
-import org.elasticsearch.search.SearchRequestParsers;
 import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.tasks.TaskManager;
@@ -55,19 +54,16 @@ public abstract class BaseTransportCoordinateSearchAction<Request extends Action
 extends TransportAction<Request, Response> {
 
   protected final Client client;
-  private final SearchRequestParsers searchRequestParsers;
   private final NamedXContentRegistry xContentRegistry;
 
   protected BaseTransportCoordinateSearchAction(final Settings settings, final String actionName,
                                                 final ThreadPool threadPool, final TransportService transportService,
                                                 final ActionFilters actionFilters, final IndexNameExpressionResolver indexNameExpressionResolver,
-                                                final SearchRequestParsers searchRequestParsers,
                                                 final Client client, NamedXContentRegistry xContentRegistry, Supplier<Request> request) {
     super(settings, actionName, threadPool, actionFilters, indexNameExpressionResolver, transportService.getTaskManager());
     // Use the generic threadpool, as we can end up with deadlock with the SEARCH threadpool
     transportService.registerRequestHandler(actionName, request, ThreadPool.Names.GENERIC, new TransportHandler());
     this.client = client;
-    this.searchRequestParsers = searchRequestParsers;
     this.xContentRegistry = xContentRegistry;
   }
 
@@ -96,8 +92,8 @@ extends TransportAction<Request, Response> {
     try {
       // Enforce the content type to be CBOR as it is more efficient for large byte arrays
       try (XContentBuilder builder = XContentFactory.cborBuilder().map(map)) {
-        QueryParseContext context = new QueryParseContext(XContentHelper.createParser(xContentRegistry, builder.bytes()), parseFieldMatcher);
-        return SearchSourceBuilder.fromXContent(context, searchRequestParsers.aggParsers, searchRequestParsers.suggesters, searchRequestParsers.searchExtParsers);
+        QueryParseContext context = new QueryParseContext(XContentHelper.createParser(xContentRegistry, builder.bytes(), XContentType.CBOR));
+        return SearchSourceBuilder.fromXContent(context);
       }
     }
     catch (IOException e) {
