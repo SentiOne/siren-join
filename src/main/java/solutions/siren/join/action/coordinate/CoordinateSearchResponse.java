@@ -92,11 +92,6 @@ public class CoordinateSearchResponse extends SearchResponse {
   }
 
   @Override
-  public long getTookInMillis() {
-    return searchResponse.getTookInMillis();
-  }
-
-  @Override
   public int getTotalShards() {
     return searchResponse.getTotalShards();
   }

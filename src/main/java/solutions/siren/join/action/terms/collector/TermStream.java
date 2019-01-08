@@ -20,6 +20,8 @@ package solutions.siren.join.action.terms.collector;
 
 import org.apache.lucene.index.IndexReader;
 
+import java.io.IOException;
+
 /**
  * A stream of terms coming for a given document and field. A {@link TermStream} is a reusable object
  * used in combination with {@link HitStream#getTermStream(TermStream)}.
@@ -36,6 +38,6 @@ abstract class TermStream {
    * Set the stream to the given document.
    * @see HitStream#getTermStream(TermStream)
    */
-  protected abstract void set(int atomicReaderId, int atomicDocId);
+  protected abstract void set(int atomicReaderId, int atomicDocId) throws IOException;
 
 }

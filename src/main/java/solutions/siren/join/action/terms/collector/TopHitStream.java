@@ -183,15 +183,7 @@ public class TopHitStream extends HitStream {
   private static class HitQueue extends PriorityQueue<ScoreHit> {
 
     HitQueue(int size) {
-      super(size, true);
-    }
-
-    @Override
-    protected ScoreHit getSentinelObject() {
-      // Always set the doc Id to MAX_VALUE so that it won't be favored by
-      // lessThan. This generally should not happen since if score is not NEG_INF,
-      // TopScoreDocCollector will always add the object to the queue.
-      return new ScoreHit(Integer.MAX_VALUE, Integer.MAX_VALUE, Float.NEGATIVE_INFINITY);
+      super(size, () -> new ScoreHit(Integer.MAX_VALUE, Integer.MAX_VALUE, Float.NEGATIVE_INFINITY));
     }
 
     @Override

@@ -23,12 +23,11 @@ import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.lucene.search.MatchNoDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.index.query.QueryShardContext;
 import solutions.siren.join.common.Bytes;
 
@@ -79,9 +78,7 @@ public class TermsEnumTermsQueryBuilder extends AbstractQueryBuilder<TermsEnumTe
     out.writeLong(cacheKey);
   }
 
-  public static Optional<TermsEnumTermsQueryBuilder> fromXContent(QueryParseContext parseContext) throws IOException {
-    XContentParser parser = parseContext.parser();
-
+  public static TermsEnumTermsQueryBuilder fromXContent(XContentParser parser) throws IOException {
     XContentParser.Token token = parser.nextToken();
     if (token != XContentParser.Token.FIELD_NAME) {
         throw new ParsingException(parser.getTokenLocation(), "[termsenum_terms] a field name is required");
@@ -135,7 +132,7 @@ public class TermsEnumTermsQueryBuilder extends AbstractQueryBuilder<TermsEnumTe
     }
 
 
-    return Optional.of(queryBuilder);
+    return queryBuilder;
   }
 
   @Override

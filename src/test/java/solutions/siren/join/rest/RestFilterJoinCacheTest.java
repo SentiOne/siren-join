@@ -88,7 +88,7 @@ public class RestFilterJoinCacheTest extends SirenJoinTestCase {
 
   private void loadData() throws ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 

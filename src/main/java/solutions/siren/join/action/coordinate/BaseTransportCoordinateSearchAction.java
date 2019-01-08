@@ -32,7 +32,6 @@ import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.*;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -92,7 +91,7 @@ extends TransportAction<Request, Response> {
     try {
       // Enforce the content type to be CBOR as it is more efficient for large byte arrays
       try (XContentBuilder builder = XContentFactory.cborBuilder().map(map)) {
-        QueryParseContext context = new QueryParseContext(XContentHelper.createParser(xContentRegistry, builder.bytes(), XContentType.CBOR));
+        XContentParser context = XContentHelper.createParser(xContentRegistry, LoggingDeprecationHandler.INSTANCE, BytesReference.bytes(builder), XContentType.CBOR);
         return SearchSourceBuilder.fromXContent(context);
       }
     }

@@ -35,7 +35,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithStringFields() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -84,7 +84,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithIntegerFields() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -139,8 +139,8 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -207,8 +207,8 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -274,8 +274,8 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -322,9 +322,9 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type1", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=string")
-                                                             .addMapping("type3", "id", "type=integer", "tag", "type=string")
-                                                             .addMapping("type4", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=text")
+                                                             .addMapping("type3", "id", "type=integer", "tag", "type=text")
+                                                             .addMapping("type4", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -368,8 +368,8 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type1", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type3", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "foreign_key", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type3", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -418,8 +418,8 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type1", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -463,7 +463,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -497,7 +497,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithIntegerEncoding() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -549,7 +549,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
 
   public void testInvalidTargetField() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -576,7 +576,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testInvalidSourceField() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -603,7 +603,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithBloomEncoding() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -656,7 +656,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithBytesEncodingOnIntegerField() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -709,7 +709,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithBytesEncodingOnStringField() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -762,7 +762,7 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
   @Test
   public void testSimpleJoinWithBytesEncodingOnLongField() throws Exception {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=long", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 

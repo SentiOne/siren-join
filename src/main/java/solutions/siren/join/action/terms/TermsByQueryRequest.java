@@ -27,8 +27,11 @@ import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.cbor.CborXContent;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 
@@ -121,7 +124,15 @@ public class TermsByQueryRequest extends BroadcastRequest<TermsByQueryRequest> {
    * @see {@link org.elasticsearch.index.query.QueryBuilders}
    */
   public TermsByQueryRequest query(AbstractQueryBuilder<?> queryBuilder) {
-    this.querySource = queryBuilder == null ? null : queryBuilder.buildAsBytes();
+	  try {
+	  	if (queryBuilder != null) {
+			XContentBuilder builder = CborXContent.contentBuilder();
+			queryBuilder.toXContent(builder, ToXContent.EMPTY_PARAMS);
+			this.querySource = BytesReference.bytes(builder);
+		}
+    } catch (IOException e) {
+		  e.printStackTrace();
+	  }
     return this;
   }
 
@@ -129,7 +140,7 @@ public class TermsByQueryRequest extends BroadcastRequest<TermsByQueryRequest> {
    * The query source to execute.
    */
   public TermsByQueryRequest query(XContentBuilder builder) {
-    this.querySource = builder == null ? null : builder.bytes();
+    this.querySource = builder == null ? null : BytesReference.bytes(builder);
     return this;
   }
 

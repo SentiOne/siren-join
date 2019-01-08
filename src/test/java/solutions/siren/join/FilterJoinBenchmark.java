@@ -19,6 +19,7 @@
 package solutions.siren.join;
 
 import org.elasticsearch.Version;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.index.IndexModule;
 import org.elasticsearch.node.MockNode;
 import org.elasticsearch.node.NodeValidationException;
@@ -138,7 +139,7 @@ public class FilterJoinBenchmark {
       log("Query cache size: [0]=" + nodeStats.get(0).getIndices().getQueryCache().getMemorySize() + ", [1]=" + nodeStats.get(1).getIndices().getQueryCache().getMemorySize());
       log("");
       log("==== NETWORK ====");
-      log("Transport: [0]=" + nodeStats.get(0).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).string() + ", [1]=" + nodeStats.get(1).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).string());
+      log("Transport: [0]=" + nodeStats.get(0).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).toString() + ", [1]=" + nodeStats.get(1).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).toString());
       log("");
     }
 
@@ -155,11 +156,11 @@ public class FilterJoinBenchmark {
         log("==== INDEX SETUP ====");
         try {
           client.admin().indices().create(createIndexRequest(PARENT_INDEX).mapping(PARENT_TYPE,
-                  "id", "type=string,index=not_analyzed,doc_values=true",
+                  "id", "type=text,index=not_analyzed,doc_values=true",
                   "num", "type=integer,doc_values=true")).actionGet();
           client.admin().indices().create(createIndexRequest(CHILD_INDEX).mapping(CHILD_TYPE,
-                  "id", "type=string,index=not_analyzed,doc_values=true",
-                  "pid", "type=string,index=not_analyzed,doc_values=true",
+                  "id", "type=text,index=not_analyzed,doc_values=true",
+                  "pid", "type=text,index=not_analyzed,doc_values=true",
                   "num", "type=integer,doc_values=true")).actionGet();
             Thread.sleep(5000);
 
@@ -213,8 +214,8 @@ public class FilterJoinBenchmark {
     }
 
     public void warmFieldData(String parentField, String childField) {
-        ListenableActionFuture<SearchResponse> parentSearch = null;
-        ListenableActionFuture<SearchResponse> childSearch = null;
+        ActionFuture<SearchResponse> parentSearch = null;
+        ActionFuture<SearchResponse> childSearch = null;
 
         if (parentField != null) {
             parentSearch = client
@@ -242,12 +243,12 @@ public class FilterJoinBenchmark {
             log("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
         }
 
-        long hits = searchResponse.getHits().totalHits();
+        long hits = searchResponse.getHits().totalHits;
         if (hits != expectedHits) {
             log("[" + name + "][#" + testNum + "] Hits Mismatch:  expected [" + expectedHits + "], got [" + hits + "]");
         }
 
-        return searchResponse.getTookInMillis();
+        return searchResponse.getTook().getMillis();
     }
 
     /**

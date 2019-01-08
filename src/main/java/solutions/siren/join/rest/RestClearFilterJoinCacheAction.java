@@ -39,7 +39,12 @@ public class RestClearFilterJoinCacheAction extends BaseRestHandler {
     controller.registerHandler(RestRequest.Method.GET, "/_filter_join/cache/clear", this);
   }
 
-  @Override
+	@Override
+	public String getName() {
+		return "RestClearFilterJoinCacheAction";
+	}
+
+	@Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
     ClearFilterJoinCacheRequest clearFilterJoinCacheRequest = new ClearFilterJoinCacheRequest();
     return (consumer) -> client.execute(ClearFilterJoinCacheAction.INSTANCE, clearFilterJoinCacheRequest,

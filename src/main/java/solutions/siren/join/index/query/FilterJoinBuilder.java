@@ -26,6 +26,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.rest.action.RestActions;
 import solutions.siren.join.action.terms.TermsByQueryRequest;
 
 import java.io.IOException;
@@ -205,9 +206,7 @@ public class FilterJoinBuilder extends AbstractQueryBuilder<FilterJoinBuilder> {
     builder.endObject();
   }
 
-  public static Optional<FilterJoinBuilder> fromXContent(QueryParseContext parseContext) throws IOException {
-     XContentParser parser = parseContext.parser();
-
+  public static FilterJoinBuilder fromXContent(XContentParser parser) throws IOException {
     XContentParser.Token token = parser.nextToken();
     if (token != XContentParser.Token.FIELD_NAME) {
       throw new ParsingException(parser.getTokenLocation(), "[filterjoin] a field name is required");
@@ -248,7 +247,11 @@ public class FilterJoinBuilder extends AbstractQueryBuilder<FilterJoinBuilder> {
             if (parser.currentToken() == XContentParser.Token.VALUE_NULL) {
               query = Optional.empty();
             } else {
-              query = parseContext.parseInnerQueryBuilder();
+              try {
+				query = Optional.ofNullable(AbstractQueryBuilder.parseInnerQueryBuilder(parser));
+			  } catch (Exception e) {
+				query = Optional.empty();
+			  }
             }
           } else if ("orderBy".equals(currentFieldName)) {
             orderBy = Enum.valueOf(TermsByQueryRequest.Ordering.class, parser.text());
@@ -307,7 +310,7 @@ public class FilterJoinBuilder extends AbstractQueryBuilder<FilterJoinBuilder> {
       queryBuilder.path(path);
     }
 
-    return Optional.of(queryBuilder);
+    return queryBuilder;
   }
 
   @Override

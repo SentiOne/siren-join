@@ -27,17 +27,22 @@ import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.block.ClusterBlockLevel;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.AtomicArray;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.cbor.CborXContent;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import solutions.siren.join.action.admin.cache.FilterJoinCacheService;
 import solutions.siren.join.action.coordinate.execution.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +97,17 @@ public class TransportCoordinateMultiSearchAction extends BaseTransportCoordinat
 
     for (int i = 0; i < request.requests().size(); i++) {
       // Parse query source
-      Tuple<XContentType, Map<String, Object>> parsedSource = this.parseSource(request.requests().get(i).source().buildAsBytes());
+		XContentBuilder builder = null;
+		try {
+			builder = CborXContent.contentBuilder();
+			request.requests().get(i).source().toXContent(builder, ToXContent.EMPTY_PARAMS);
+		} catch (IOException e) {
+			logger.error("Error while parsing query source", e);
+		}
+		BytesReference bytes = BytesReference.bytes(builder);
+
+
+      Tuple<XContentType, Map<String, Object>> parsedSource = this.parseSource(bytes);
       Map<String, Object> map = parsedSource.v2();
 
       // Query planning and execution of filter joins

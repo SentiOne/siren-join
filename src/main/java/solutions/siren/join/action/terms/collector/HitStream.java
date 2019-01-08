@@ -87,7 +87,7 @@ public abstract class HitStream {
   /**
    * Get the {@link TermStream} for the current hit.
    */
-  public <T extends TermStream> T getTermStream(T reusableTermStream) {
+  public <T extends TermStream> T getTermStream(T reusableTermStream) throws IOException {
     reusableTermStream.set(this.getAtomicReaderId(), this.getAtomicDocId());
     return reusableTermStream;
   }

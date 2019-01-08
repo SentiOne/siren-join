@@ -60,7 +60,7 @@ public class RestApiTest extends SirenJoinTestCase {
   @Test
   public void testCoordinateSearchApi() throws IOException, ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -140,8 +140,8 @@ public class RestApiTest extends SirenJoinTestCase {
    */
   @Test
   public void testCiapiOutput() throws IOException, ExecutionException, InterruptedException {
-    assertAcked(prepareCreate("email").addMapping("email", "id", "type=string", "content_md5", "type=keyword"));
-    assertAcked(prepareCreate("ciapioutput").addMapping("ciapioutput", "id", "type=string", "content_md5", "type=keyword"));
+    assertAcked(prepareCreate("email").addMapping("email", "id", "type=text", "content_md5", "type=keyword"));
+    assertAcked(prepareCreate("ciapioutput").addMapping("ciapioutput", "id", "type=text", "content_md5", "type=keyword"));
 
     ensureGreen();
 
@@ -179,7 +179,7 @@ public class RestApiTest extends SirenJoinTestCase {
   @Test
   public void testCoordinateMultiSearchApi() throws IOException, ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -220,7 +220,7 @@ public class RestApiTest extends SirenJoinTestCase {
   @Test
   public void testNullQueryInFilterJoin() throws IOException, ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -251,7 +251,7 @@ public class RestApiTest extends SirenJoinTestCase {
     // Enforce one single shard for index2
     Map<String, Object> indexSettings = new HashMap<>();
     indexSettings.put("number_of_shards", 1);
-    assertAcked(prepareCreate("index2").setSettings(indexSettings).addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(indexSettings).addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 

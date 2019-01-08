@@ -40,7 +40,12 @@ public class RestStatsFilterJoinCacheAction extends BaseRestHandler {
     controller.registerHandler(RestRequest.Method.GET, "/_filter_join/cache/stats", this);
   }
 
-  @Override
+	@Override
+	public String getName() {
+		return "RestStatsFilterJoinCacheAction";
+	}
+
+	@Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
     StatsFilterJoinCacheRequest statsFilterJoinCacheRequest = new StatsFilterJoinCacheRequest();
     return (consumer) -> client.doExecute(StatsFilterJoinCacheAction.INSTANCE, statsFilterJoinCacheRequest,

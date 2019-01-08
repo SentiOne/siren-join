@@ -55,7 +55,12 @@ public class RestCoordinateMultiSearchAction extends BaseRestHandler {
     this.allowExplicitIndex = settings.getAsBoolean("rest.action.multi.allow_explicit_index", true);
   }
 
-  @Override
+	@Override
+	public String getName() {
+		return "RestCoordinateMultiSearchAction";
+	}
+
+	@Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
     MultiSearchRequest multiSearchRequest = RestMultiSearchAction.parseRequest(request, allowExplicitIndex);
     return channel -> client.execute(CoordinateMultiSearchAction.INSTANCE, multiSearchRequest, new RestToXContentListener<>(channel));

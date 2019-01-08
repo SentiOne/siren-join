@@ -26,6 +26,8 @@ import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.fielddata.IndexNumericFieldData;
 import org.elasticsearch.index.fielddata.SortedBinaryDocValues;
 
+import java.io.IOException;
+
 /**
  * A stream of numeric terms coming for a given document and field. A {@link NumericTermStream} is a reusable object
  * used in combination with {@link HitStream#getTermStream(TermStream)}.
@@ -62,13 +64,13 @@ abstract class NumericTermStream extends TermStream {
   /**
    * Move to the next term in the stream, and returns its long value (i.e., hash for string field type).
    */
-  public abstract long next();
+  public abstract long next() throws IOException;
 
   /**
    * Set the stream to the given document.
    * @see HitStream#getTermStream(TermStream)
    */
-  protected abstract void set(int atomicReaderId, int atomicDocId);
+  protected abstract void set(int atomicReaderId, int atomicDocId) throws IOException;
 
   /**
    * A term stream for numeric long values.
@@ -86,26 +88,27 @@ abstract class NumericTermStream extends TermStream {
     }
 
     @Override
-    protected void set(int atomicReaderId, int atomicDocId) {
+    protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
       if (lastAtomicReaderId != atomicReaderId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = this.fieldData.load(leafReader).getLongValues();
       }
-      this.values.setDocument(atomicDocId);
+      this.values.advanceExact(atomicDocId);
       this.count = 0;
       this.lastAtomicReaderId = atomicReaderId;
     }
 
     @Override
     public boolean hasNext() {
-      return this.count < this.values.count();
+      return this.count < this.values.docValueCount();
     }
 
     @Override
-    public long next() {
-      return this.values.valueAt(this.count++);
+    public long next() throws IOException {
+      this.count++;
+      return this.values.nextValue();
     }
 
   }
@@ -126,26 +129,27 @@ abstract class NumericTermStream extends TermStream {
     }
 
     @Override
-    protected void set(int atomicReaderId, int atomicDocId) {
+    protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
       if (lastAtomicReaderId != atomicReaderId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = this.fieldData.load(leafReader).getBytesValues();
       }
-      this.values.setDocument(atomicDocId);
+      this.values.advanceExact(atomicDocId);
       this.count = 0;
       this.lastAtomicReaderId = atomicReaderId;
     }
 
     @Override
     public boolean hasNext() {
-      return this.count < this.values.count();
+      return this.count < this.values.docValueCount();
     }
 
     @Override
-    public long next() {
-      final BytesRef term = values.valueAt(this.count++);
+    public long next() throws IOException {
+      this.count++;
+      final BytesRef term = values.nextValue();
       return LongBloomFilter.hash3_x64_128(term.bytes, term.offset, term.length, 0);
     }
 

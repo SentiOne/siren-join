@@ -152,10 +152,15 @@ public class TermsEnumTermsQuery extends Query implements Accountable {
   }
 
   @Override
-  public Weight createWeight(final IndexSearcher searcher, final boolean needsScores) throws IOException {
-    return new ConstantScoreWeight(new CacheKeyFieldDataTermsQuery(cacheKey)) {
+  public Weight createWeight(final IndexSearcher searcher, final boolean needsScores, float boost) throws IOException {
+    return new ConstantScoreWeight(new CacheKeyFieldDataTermsQuery(cacheKey), 0.0f) {
 
-      @Override
+		@Override
+		public boolean isCacheable(LeafReaderContext leafReaderContext) {
+			return false;
+		}
+
+		@Override
       public void extractTerms(Set<Term> terms) {
         // no-op
         // This query is for abuse cases when the number of terms is too high to

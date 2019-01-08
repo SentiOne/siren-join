@@ -24,8 +24,10 @@ import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.breaker.CircuitBreaker;
 import org.elasticsearch.common.util.PageCacheRecycler;
+import org.elasticsearch.common.xcontent.LoggingDeprecationHandler;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.index.mapper.MappedFieldType;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
@@ -54,7 +56,6 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.query.ParsedQuery;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.script.ScriptService;
@@ -159,7 +160,7 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
     int failedShards = 0;
     int numTerms = 0;
     TermsSet[] termsSets = new TermsSet[shardsResponses.length()];
-    List<ShardOperationFailedException> shardFailures = null;
+    List<DefaultShardOperationFailedException> shardFailures = null;
 
     // we check each shard response
     for (int i = 0; i < shardsResponses.length(); i++) {
@@ -229,19 +230,19 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
    * The operation that executes the query and generates a {@link TermsByQueryShardResponse} for each shard.
    */
   @Override
-  protected TermsByQueryShardResponse shardOperation(TermsByQueryShardRequest shardRequest) throws ElasticsearchException, IOException {
+  protected TermsByQueryShardResponse shardOperation(TermsByQueryShardRequest shardRequest, Task task) throws ElasticsearchException, IOException {
     IndexService indexService = indicesService.indexServiceSafe(shardRequest.shardId().getIndex());
-    IndexShard indexShard = indexService.getShard(shardRequest.shardId().id());
     TermsByQueryRequest request = shardRequest.request();
     OrderByShardOperation orderByOperation = OrderByShardOperation.get(request.getOrderBy(), request.maxTermsPerShard());
 
     SearchShardTarget shardTarget = new SearchShardTarget(clusterService.localNode().getId(),
                                                           shardRequest.shardId().getIndex(),
-                                                          shardRequest.shardId().id());
+                                                          shardRequest.shardId().id(),
+                                                          clusterService.getClusterName().value());
 
     ShardSearchRequest shardSearchRequest = new ShardSearchLocalRequest(shardRequest.shardId(), request.types(), request.nowInMillis(),
                                                                         shardRequest.filteringAliases());
-    SearchContext context = searchService.createSearchContext(shardSearchRequest, SearchService.NO_TIMEOUT, indexShard.acquireSearcher("termsByQuery"));
+    SearchContext context = searchService.createSearchContext(shardSearchRequest, SearchService.NO_TIMEOUT);
 
     try {
       MappedFieldType fieldType = context.smartNameFieldType(request.field());
@@ -250,13 +251,14 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
                 "' not found for types " + Arrays.toString(request.types()));
       }
 
-      IndexFieldData indexFieldData = context.fieldData().getForField(fieldType);
+      IndexFieldData indexFieldData = context.getForField(fieldType);
 
       BytesReference querySource = request.querySource();
       if (querySource != null && querySource.length() > 0) {
         XContentParser queryParser = null;
         try {
-          queryParser = XContentFactory.xContent(querySource).createParser(indexService.xContentRegistry(), querySource);
+			byte[] bytes = BytesReference.toBytes(querySource);
+			queryParser = XContentFactory.xContent(bytes).createParser(indexService.xContentRegistry(), LoggingDeprecationHandler.INSTANCE, bytes);
           context.getQueryShardContext().setTypes(request.types());
           ParsedQuery parsedQuery = orderByOperation.getParsedQuery(queryParser, context.getQueryShardContext());
           if (parsedQuery != null) {
@@ -328,8 +330,12 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
      * Returns the {@link ParsedQuery} associated to this order by operation.
      */
     protected ParsedQuery getParsedQuery(final XContentParser queryParser, final QueryShardContext queryShardContext) throws IOException {
-      QueryParseContext context = new QueryParseContext(queryParser);
-      Optional<QueryBuilder> queryBuilder = context.parseInnerQueryBuilder();
+      Optional<QueryBuilder> queryBuilder;
+      try {
+      	queryBuilder = Optional.ofNullable(AbstractQueryBuilder.parseInnerQueryBuilder(queryParser));
+	  } catch (Exception e) {
+      	queryBuilder = Optional.empty();
+	  }
       return queryBuilder.isPresent() ? new ParsedQuery(queryBuilder.get().toQuery(queryShardContext)) : null;
     }
 
@@ -392,6 +398,7 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
       if (maxTermsPerShard == null) {
         throw new ElasticsearchParseException("[termsByQuery] maxTermsPerShard parameter is null");
       }
+
       return new TopHitStream(maxTermsPerShard, context.query(), context.searcher());
     }
   }

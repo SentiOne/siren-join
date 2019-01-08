@@ -18,6 +18,7 @@
  */
 package solutions.siren.join.action.terms;
 
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
@@ -137,7 +138,7 @@ public class TermsByQueryBenchmark {
       log("Query cache size: [0]=" + nodeStats.get(0).getIndices().getQueryCache().getMemorySize() + ", [1]=" + nodeStats.get(1).getIndices().getQueryCache().getMemorySize());
       log("");
       log("==== NETWORK ====");
-      log("Transport: [0]=" + nodeStats.get(0).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).string() + ", [1]=" + nodeStats.get(1).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).string());
+      log("Transport: [0]=" + nodeStats.get(0).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).toString() + ", [1]=" + nodeStats.get(1).getTransport().toXContent(jsonBuilder(), ToXContent.EMPTY_PARAMS).toString());
       log("");
     }
 
@@ -207,8 +208,8 @@ public class TermsByQueryBenchmark {
     }
 
     public void warmFieldData(String parentField, String childField) {
-        ListenableActionFuture<SearchResponse> parentSearch = null;
-        ListenableActionFuture<SearchResponse> childSearch = null;
+        ActionFuture<SearchResponse> parentSearch = null;
+        ActionFuture<SearchResponse> childSearch = null;
 
         if (parentField != null) {
             parentSearch = client

@@ -35,8 +35,8 @@
   </scm>
 
   <properties>
-    <lucene.version>6.5.1</lucene.version>
-    <elasticsearch.version>5.4.1</elasticsearch.version>
+    <lucene.version>7.5.0</lucene.version>
+    <elasticsearch.version>6.5.4</elasticsearch.version>
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <siren.tools.directory>${project.basedir}/dev-tools</siren.tools.directory>
@@ -125,31 +125,6 @@
             <phase>package</phase>
             <goals>
               <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>3.0</version>
-        <configuration>
-          <header>${siren.license.header}</header>
-          <headerDefinitions>
-            <headerDefinition>${siren.license.headerDefinition}</headerDefinition>
-          </headerDefinitions>
-          <includes>
-            <include>src/main/java/solutions/siren/**/*.java</include>
-            <include>src/test/java/solutions/siren/**/*.java</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>check-license-headers</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>check</goal>
             </goals>
           </execution>
         </executions>

@@ -19,7 +19,7 @@
 package solutions.siren.join.action.terms;
 
 import org.apache.lucene.util.BytesRef;
-import org.elasticsearch.action.ShardOperationFailedException;
+import org.elasticsearch.action.support.DefaultShardOperationFailedException;
 import org.elasticsearch.action.support.broadcast.BroadcastResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -74,7 +74,7 @@ public class TermsByQueryResponse extends BroadcastResponse {
    * @param shardFailures    the failures
    */
   TermsByQueryResponse(TermsSet termsSet, long tookInMillis, int totalShards, int successfulShards, int failedShards,
-                       List<ShardOperationFailedException> shardFailures) {
+                       List<DefaultShardOperationFailedException> shardFailures) {
     super(totalShards, successfulShards, failedShards, shardFailures);
     this.encodedTerms = termsSet.writeToBytes();
     this.termsEncoding = termsSet.getEncoding();

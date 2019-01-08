@@ -33,7 +33,7 @@ public class CoordinateSearchRequestBuilder extends SearchRequestBuilder {
 
   @Override
   public void execute(final ActionListener<SearchResponse> listener) {
-    client.execute(CoordinateSearchAction.INSTANCE, beforeExecute(request), listener);
+    client.execute(CoordinateSearchAction.INSTANCE, request, listener);
   }
 
 }

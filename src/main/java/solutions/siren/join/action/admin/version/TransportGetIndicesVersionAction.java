@@ -18,8 +18,8 @@
  */
 package solutions.siren.join.action.admin.version;
 
-import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.support.ActionFilters;
+import org.elasticsearch.action.support.DefaultShardOperationFailedException;
 import org.elasticsearch.action.support.broadcast.node.TransportBroadcastByNodeAction;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.block.ClusterBlockException;
@@ -62,7 +62,7 @@ public class TransportGetIndicesVersionAction extends TransportBroadcastByNodeAc
   }
 
   @Override
-  protected GetIndicesVersionResponse newResponse(GetIndicesVersionRequest request, int totalShards, int successfulShards, int failedShards, List<ShardIndexVersion> shardVersions, List<ShardOperationFailedException> shardFailures, ClusterState clusterState) {
+  protected GetIndicesVersionResponse newResponse(GetIndicesVersionRequest request, int totalShards, int successfulShards, int failedShards, List<ShardIndexVersion> shardVersions, List<DefaultShardOperationFailedException> shardFailures, ClusterState clusterState) {
     return new GetIndicesVersionResponse(shardVersions.toArray(new ShardIndexVersion[shardVersions.size()]), totalShards, successfulShards, failedShards, shardFailures);
   }
 

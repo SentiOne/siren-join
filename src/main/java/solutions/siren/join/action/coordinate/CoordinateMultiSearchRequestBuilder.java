@@ -33,7 +33,7 @@ public class CoordinateMultiSearchRequestBuilder extends MultiSearchRequestBuild
 
   @Override
   public void execute(final ActionListener<MultiSearchResponse> listener) {
-    client.execute(CoordinateMultiSearchAction.INSTANCE, beforeExecute(request), listener);
+    client.execute(CoordinateMultiSearchAction.INSTANCE, request, listener);
   }
 
 }

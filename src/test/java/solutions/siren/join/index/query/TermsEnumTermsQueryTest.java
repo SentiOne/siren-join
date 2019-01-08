@@ -20,7 +20,6 @@ package solutions.siren.join.index.query;
 
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.BytesRefBuilder;
-import org.apache.lucene.util.LegacyNumericUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.IndexModule;
@@ -59,7 +58,7 @@ public class TermsEnumTermsQueryTest extends SirenJoinTestCase {
 
   @Test
   public void testStringFilter() throws Exception {
-    assertAcked(prepareCreate("index1").addMapping("type", "id", "type=string"));
+    assertAcked(prepareCreate("index1").addMapping("type", "id", "type=text"));
     ensureGreen();
 
     indexRandom(true,

@@ -73,9 +73,4 @@ public class TransportClearFilterJoinCacheAction extends TransportNodesAction<Cl
     return new ClearFilterJoinCacheNodeResponse(clusterService.localNode(), System.currentTimeMillis());
   }
 
-  @Override
-  protected boolean accumulateExceptions() {
-    return false;
-  }
-
 }

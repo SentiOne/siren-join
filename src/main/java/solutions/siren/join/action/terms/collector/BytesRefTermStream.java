@@ -23,10 +23,11 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.BytesRefBuilder;
-import org.apache.lucene.util.LegacyNumericUtils;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.fielddata.IndexNumericFieldData;
 import org.elasticsearch.index.fielddata.SortedBinaryDocValues;
+
+import java.io.IOException;
 
 /**
  * A stream of terms coming for a given document and field. A {@link BytesRefTermStream} is a reusable object
@@ -49,13 +50,13 @@ abstract class BytesRefTermStream extends TermStream {
   /**
    * Move to the next term in the stream, and returns its long value (i.e., hash for string field type).
    */
-  public abstract BytesRef next();
+  public abstract BytesRef next() throws IOException;
 
   /**
    * Set the stream to the given document.
    * @see HitStream#getTermStream(TermStream)
    */
-  protected abstract void set(int atomicReaderId, int atomicDocId);
+  protected abstract void set(int atomicReaderId, int atomicDocId) throws IOException;
 
   private static class BytesBytesRefTermStream extends BytesRefTermStream {
 
@@ -69,26 +70,27 @@ abstract class BytesRefTermStream extends TermStream {
 
     @Override
     public boolean hasNext() {
-      if (this.count < this.values.count()) {
+      if (this.count < this.values.docValueCount()) {
         return true;
       }
       return false;
     }
 
     @Override
-    public BytesRef next() {
-      return values.valueAt(this.count++);
+    public BytesRef next() throws IOException {
+      this.count++;
+      return values.nextValue();
     }
 
     @Override
-    protected void set(int atomicReaderId, int atomicDocId) {
+    protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
       if (lastAtomicReaderId != atomicReaderId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = this.fieldData.load(leafReader).getBytesValues();
       }
-      this.values.setDocument(atomicDocId);
+      this.values.advanceExact(atomicDocId);
       this.count = 0;
       this.lastAtomicReaderId = atomicReaderId;
     }
@@ -107,21 +109,21 @@ abstract class BytesRefTermStream extends TermStream {
 
     @Override
     public boolean hasNext() {
-      if (this.count < this.values.count()) {
+      if (this.count < this.values.docValueCount()) {
         return true;
       }
       return false;
     }
 
     @Override
-    protected void set(int atomicReaderId, int atomicDocId) {
+    protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
       if (lastAtomicReaderId != atomicReaderId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = ((IndexNumericFieldData) this.fieldData).load(leafReader).getLongValues();
       }
-      this.values.setDocument(atomicDocId);
+      this.values.advanceExact(atomicDocId);
       this.count = 0;
       this.lastAtomicReaderId = atomicReaderId;
     }
@@ -135,9 +137,10 @@ abstract class BytesRefTermStream extends TermStream {
     }
 
     @Override
-    public BytesRef next() {
+    public BytesRef next() throws IOException {
       BytesRefBuilder b = new BytesRefBuilder();
-      LegacyNumericUtils.intToPrefixCoded((int) values.valueAt(this.count++), 0, b);
+      this.count++;
+      LegacyNumericUtils.intToPrefixCoded((int) values.nextValue(), 0, b);
       return b.toBytesRef();
     }
 
@@ -150,9 +153,10 @@ abstract class BytesRefTermStream extends TermStream {
     }
 
     @Override
-    public BytesRef next() {
+    public BytesRef next() throws IOException {
       BytesRefBuilder b = new BytesRefBuilder();
-      LegacyNumericUtils.longToPrefixCoded((int) values.valueAt(this.count++), 0, b);
+      this.count++;
+      LegacyNumericUtils.longToPrefixCoded((int) values.nextValue(), 0, b);
       return b.toBytesRef();
     }
 

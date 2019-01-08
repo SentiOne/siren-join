@@ -72,9 +72,4 @@ public class TransportStatsFilterJoinCacheAction extends TransportNodesAction<St
     return new StatsFilterJoinCacheNodeResponse(clusterService.localNode(), System.currentTimeMillis(), cacheService.getStats());
   }
 
-  @Override
-  protected boolean accumulateExceptions() {
-    return false;
-  }
-
 }

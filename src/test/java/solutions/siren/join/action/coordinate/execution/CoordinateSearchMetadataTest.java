@@ -142,7 +142,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testMaxTermsPerShard() throws IOException, ExecutionException, InterruptedException {
     ElasticsearchAssertions.assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -192,7 +192,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testTermsEncoding() throws IOException, ExecutionException, InterruptedException {
     ElasticsearchAssertions.assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -242,7 +242,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testOrdering() throws IOException, ExecutionException, InterruptedException {
     ElasticsearchAssertions.assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -293,7 +293,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testCoordinateSearchMetadata() throws IOException, ExecutionException, InterruptedException {
     ElasticsearchAssertions.assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    ElasticsearchAssertions.assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -342,8 +342,8 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testCoordinateSearchMetadataWithNestedJoins() throws IOException, ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword", "tag", "type=string"));
-    assertAcked(prepareCreate("index3").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -421,7 +421,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
     // Enforce one single shard for index2
     Map<String, Object> indexSettings = new HashMap<>();
     indexSettings.put("number_of_shards", 1);
-    assertAcked(prepareCreate("index2").setSettings(indexSettings).addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").setSettings(indexSettings).addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 
@@ -503,7 +503,7 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
   @Test
   public void testCoordinateMultiSearchMetadata() throws IOException, ExecutionException, InterruptedException {
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword"));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string"));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text"));
 
     ensureGreen();
 

@@ -46,7 +46,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.*;
 
-@ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes=1, numClientNodes = 0, supportsDedicatedMasters = false, randomDynamicTemplates=false)
+@ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes=1, numClientNodes = 0, supportsDedicatedMasters = false)
 public class CircuitBreakerTest extends SirenJoinTestCase {
 
   @Before
@@ -54,7 +54,7 @@ public class CircuitBreakerTest extends SirenJoinTestCase {
     Settings.Builder builder = Settings.builder().put("index.number_of_shards", 1);
     builder.put("index.number_of_replicas", 0);
     assertAcked(prepareCreate("index1").addMapping("type", "id", "type=keyword", "foreign_key", "type=keyword").setSettings(builder));
-    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=string").setSettings(builder));
+    assertAcked(prepareCreate("index2").addMapping("type", "id", "type=keyword", "tag", "type=text").setSettings(builder));
 
     ensureGreen();
 
@@ -143,7 +143,6 @@ public class CircuitBreakerTest extends SirenJoinTestCase {
         assertThat(shardSearchFailure.status(), equalTo(restStatus));
         assertThat(shardSearchFailure.reason(), reasonMatcher);
       }
-      assertVersionSerializable(searchResponse);
     } catch (ElasticsearchException e) {
       assertThat(e.status(), equalTo(restStatus));
       assertThat(e.toString(), reasonMatcher);

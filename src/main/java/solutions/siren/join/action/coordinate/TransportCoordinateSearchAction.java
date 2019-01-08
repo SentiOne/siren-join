@@ -25,16 +25,21 @@ import org.elasticsearch.action.search.TransportSearchAction;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.cbor.CborXContent;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import solutions.siren.join.action.admin.cache.FilterJoinCacheService;
 import solutions.siren.join.action.coordinate.execution.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -69,7 +74,14 @@ public class TransportCoordinateSearchAction extends BaseTransportCoordinateSear
     FilterJoinCache cache = cacheService.getCacheInstance();
 
     // Parse query source
-    Tuple<XContentType, Map<String, Object>> parsedSource = this.parseSource(request.source().buildAsBytes());
+    Tuple<XContentType, Map<String, Object>> parsedSource = null;
+    try {
+	  XContentBuilder builder = CborXContent.contentBuilder();
+	  request.source().toXContent(builder, ToXContent.EMPTY_PARAMS);
+	  parsedSource = this.parseSource(BytesReference.bytes(builder));
+	} catch (IOException e) {
+		logger.error("Error while parsing query source", e);
+	}
     if (parsedSource != null) { // can be null if this is a uri search (query parameter in extraSource)
       Map<String, Object> map = parsedSource.v2();
 

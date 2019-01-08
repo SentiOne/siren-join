@@ -18,13 +18,12 @@
  */
 package solutions.siren.join.index.query;
 
-import org.apache.lucene.queryparser.classic.MapperQueryParser;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.lucene.search.MatchNoDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
@@ -33,9 +32,8 @@ import org.elasticsearch.index.fielddata.IndexNumericFieldData;
 import org.elasticsearch.index.mapper.KeywordFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.mapper.NumberFieldMapper;
-import org.elasticsearch.index.mapper.StringFieldMapper;
+import org.elasticsearch.index.mapper.TextFieldMapper;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.index.query.QueryShardContext;
 import solutions.siren.join.common.Bytes;
 
@@ -96,9 +94,7 @@ public class FieldDataTermsQueryBuilder extends AbstractQueryBuilder<FieldDataTe
     builder.endObject();
   }
 
-  public static Optional<FieldDataTermsQueryBuilder> fromXContent(QueryParseContext parseContext) throws IOException {
-    XContentParser parser = parseContext.parser();
-
+  public static FieldDataTermsQueryBuilder fromXContent(XContentParser parser) throws IOException {
     XContentParser.Token token = parser.nextToken();
     if (token != XContentParser.Token.FIELD_NAME) {
       throw new ParsingException(parser.getTokenLocation(), "[fielddata_terms] a field name is required");
@@ -148,7 +144,7 @@ public class FieldDataTermsQueryBuilder extends AbstractQueryBuilder<FieldDataTe
     FieldDataTermsQueryBuilder queryBuilder = new FieldDataTermsQueryBuilder(fieldName, value, cacheKey);
     queryBuilder.queryName(queryName);
 
-    return Optional.of(queryBuilder);
+    return queryBuilder;
 
   }
 
@@ -169,7 +165,7 @@ public class FieldDataTermsQueryBuilder extends AbstractQueryBuilder<FieldDataTe
 
     if (fieldType instanceof NumberFieldMapper.NumberFieldType) {
       query = FieldDataTermsQuery.newLongs(encodedTerms, (IndexNumericFieldData) fieldData, cacheKey);
-    } else if (fieldType instanceof StringFieldMapper.StringFieldType || fieldType instanceof KeywordFieldMapper.KeywordFieldType) {
+    } else if (fieldType instanceof TextFieldMapper.TextFieldType || fieldType instanceof KeywordFieldMapper.KeywordFieldType) {
       query = FieldDataTermsQuery.newBytes(encodedTerms, fieldData, cacheKey);
     } else {
       throw new ElasticsearchParseException("[fielddata_terms] query does not support field data type " + fieldType.typeName());

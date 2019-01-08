@@ -137,10 +137,15 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
   public abstract DocIdSet getDocIdSet(LeafReaderContext context) throws IOException;
 
   @Override
-  public Weight createWeight(final IndexSearcher searcher, final boolean needsScores) throws IOException {
-    return new ConstantScoreWeight(new CacheKeyFieldDataTermsQuery(cacheKey)) {
+  public Weight createWeight(final IndexSearcher searcher, final boolean needsScores, float boost) throws IOException {
+    return new ConstantScoreWeight(new CacheKeyFieldDataTermsQuery(cacheKey), 0.0f) {
 
-      @Override
+		@Override
+		public boolean isCacheable(LeafReaderContext leafReaderContext) {
+			return false;
+		}
+
+		@Override
       public void extractTerms(Set<Term> terms) {
         // no-op
         // This query is for abuse cases when the number of terms is too high to
@@ -216,21 +221,21 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
 
       IndexNumericFieldData numericFieldData = (IndexNumericFieldData) fieldData;
       if (!numericFieldData.getNumericType().isFloatingPoint()) {
-        final SortedNumericDocValues values = numericFieldData.load(context).getLongValues(); // load fielddata
-        return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
-          @Override
-          protected boolean matchDoc(int doc) {
-            values.setDocument(doc);
-            final int numVals = values.count();
-            for (int i = 0; i < numVals; i++) {
-              if (termsSet.contains(values.valueAt(i))) {
-                return true;
-              }
-            }
-
-            return false;
-          }
-        };
+//        final SortedNumericDocValues values = numericFieldData.load(context).getLongValues(); // load fielddata
+//        return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
+//          @Override
+//          protected boolean matchDoc(int doc) throws IOException {
+//            values.advanceExact(doc);
+//            final int numVals = values.docValueCount();
+//            for (int i = 0; i < numVals; i++) {
+//              if (termsSet.contains(values.nextValue())) {
+//                return true;
+//              }
+//            }
+//
+//            return false;
+//          }
+//        };
       }
 
       // only get here if wrong fielddata type in which case
@@ -282,22 +287,23 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
       if (termsSet == null || termsSet.isEmpty()) return null;
 
       final SortedBinaryDocValues values = fieldData.load(context).getBytesValues(); // load fielddata
-      return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
-        @Override
-        protected boolean matchDoc(int doc) {
-          values.setDocument(doc);
-          final int numVals = values.count();
-          for (int i = 0; i < numVals; i++) {
-            final BytesRef term = values.valueAt(i);
-            long termHash = LongBloomFilter.hash3_x64_128(term.bytes, term.offset, term.length, 0);
-            if (termsSet.contains(termHash)) {
-              return true;
-            }
-          }
-
-          return false;
-        }
-      };
+      return null;
+//     return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
+//        @Override
+//        protected boolean matchDoc(int doc) throws IOException {
+//          values.advanceExact(doc);
+//          final int numVals = values.docValueCount();
+//          for (int i = 0; i < numVals; i++) {
+//            final BytesRef term = values.nextValue();
+//            long termHash = LongBloomFilter.hash3_x64_128(term.bytes, term.offset, term.length, 0);
+//            if (termsSet.contains(termHash)) {
+//              return true;
+//            }
+//          }
+//
+//          return false;
+//        }
+//      };
     }
 
   }

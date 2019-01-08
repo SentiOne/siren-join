@@ -28,7 +28,6 @@ import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
-import org.elasticsearch.rest.action.admin.indices.RestTypesExistsAction;
 import org.elasticsearch.rest.action.search.RestSearchAction;
 import solutions.siren.join.action.coordinate.CoordinateSearchAction;
 
@@ -66,11 +65,16 @@ public class RestCoordinateSearchAction extends BaseRestHandler {
 
   }
 
-  @Override
+	@Override
+	public String getName() {
+		return "RestCoordinateSearchAction";
+	}
+
+	@Override
   protected RestChannelConsumer prepareRequest(RestRequest request, NodeClient client) throws IOException {
     SearchRequest searchRequest = new SearchRequest();
     request.withContentOrSourceParamParserOrNull(parser ->
-			 RestSearchAction.parseSearchRequest(searchRequest, request, parser)
+			 RestSearchAction.parseSearchRequest(searchRequest, request, parser, size -> searchRequest.source().size(size))
 		);
 
     return channel -> client.execute(CoordinateSearchAction.INSTANCE, searchRequest, new RestStatusToXContentListener<>(channel));
