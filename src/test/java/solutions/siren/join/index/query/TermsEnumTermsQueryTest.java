@@ -52,7 +52,6 @@ public class TermsEnumTermsQueryTest extends SirenJoinTestCase {
     Settings.Builder builder = Settings.builder();
     builder.put(super.indexSettings());
     builder.put(IndexModule.INDEX_QUERY_CACHE_ENABLED_SETTING.getKey(), true); // force query cache
-    builder.put(IndexModule.INDEX_QUERY_CACHE_EVERYTHING_SETTING.getKey(), true); // force caching even small queries
     return builder.build();
   }
 

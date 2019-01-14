@@ -61,6 +61,7 @@ abstract class BytesRefTermStream extends TermStream {
   private static class BytesBytesRefTermStream extends BytesRefTermStream {
 
     private int lastAtomicReaderId = -1;
+    private int lastAtomicDocId = -1;
     private SortedBinaryDocValues values;
     private int count;
 
@@ -86,13 +87,14 @@ abstract class BytesRefTermStream extends TermStream {
     protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
-      if (lastAtomicReaderId != atomicReaderId) {
+      if (lastAtomicReaderId != atomicReaderId || lastAtomicDocId > atomicDocId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = this.fieldData.load(leafReader).getBytesValues();
       }
       this.values.advanceExact(atomicDocId);
       this.count = 0;
       this.lastAtomicReaderId = atomicReaderId;
+      this.lastAtomicDocId = atomicDocId;
     }
 
   }
@@ -119,7 +121,7 @@ abstract class BytesRefTermStream extends TermStream {
     protected void set(int atomicReaderId, int atomicDocId) throws IOException {
       // loading values from field data cache is costly,
       // therefore we load values from cache only if new atomic reader id
-      if (lastAtomicReaderId != atomicReaderId) {
+      if (lastAtomicReaderId != atomicReaderId || this.values.docID() > atomicDocId) {
         LeafReaderContext leafReader = reader.leaves().get(atomicReaderId);
         this.values = ((IndexNumericFieldData) this.fieldData).load(leafReader).getLongValues();
       }

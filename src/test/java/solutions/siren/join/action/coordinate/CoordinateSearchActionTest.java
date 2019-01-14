@@ -322,9 +322,9 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
     Settings settings = Settings.builder().put("number_of_shards", 1).build();
 
     assertAcked(prepareCreate("index1").setSettings(settings).addMapping("type1", "id", "type=integer", "foreign_key", "type=integer"));
-    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=text")
-                                                             .addMapping("type3", "id", "type=integer", "tag", "type=text")
-                                                             .addMapping("type4", "id", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index2").setSettings(settings).addMapping("type2", "id", "type=integer", "tag", "type=text"));
+    assertAcked(prepareCreate("index3").setSettings(settings).addMapping("type3", "id", "type=integer", "tag", "type=text")); // since es 6.0 there can be only one type per index
+    assertAcked(prepareCreate("index4").setSettings(settings).addMapping("type4", "id", "type=integer", "tag", "type=text"));
 
     ensureGreen();
 
@@ -336,16 +336,16 @@ public class CoordinateSearchActionTest extends SirenJoinTestCase {
 
             client().prepareIndex("index2", "type2", "1").setSource("id", "1", "tag", "aaa"),
             client().prepareIndex("index2", "type2", "2").setSource("id", "2", "tag", "bbb"),
-            client().prepareIndex("index2", "type3", "1").setSource("id", "3", "tag", "ddd"),
-            client().prepareIndex("index2", "type3", "2").setSource("id", "4", "tag", "aaa"),
-            client().prepareIndex("index2", "type4", "1").setSource("id", "5", "tag", "ccc"),
-            client().prepareIndex("index2", "type4", "2").setSource("id", "6", "tag", "aaa"));
+            client().prepareIndex("index3", "type3", "1").setSource("id", "3", "tag", "ddd"),
+            client().prepareIndex("index3", "type3", "2").setSource("id", "4", "tag", "aaa"),
+            client().prepareIndex("index4", "type4", "1").setSource("id", "5", "tag", "ccc"),
+            client().prepareIndex("index4", "type4", "2").setSource("id", "6", "tag", "aaa"));
 
     // In order to query all the indices, we need to call setIndices() without argument to set an empty array,
     // otherwise we will get NPE. This behaviour is identical to Elasticsearch SearchRequestBuilder's behaviour.
     SearchResponse rsp = new CoordinateSearchRequestBuilder(client()).setIndices("index1").setTypes("type1").setQuery(
       boolQuery().filter(
-        QueryBuilders.filterJoin("foreign_key").indices("index2").types("type2", "type4").path("id").query(
+        QueryBuilders.filterJoin("foreign_key").indices("index2", "index3", "index4").types("type2", "type4").path("id").query(
           termQuery("tag", "aaa")
         )
       )

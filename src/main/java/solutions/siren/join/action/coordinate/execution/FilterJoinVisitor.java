@@ -295,7 +295,7 @@ public class FilterJoinVisitor {
 
     // Create the object for the constant score query
     Map<String, Object> constantScoreQueryParams = new HashMap<>();
-    constantScoreQueryParams.put("query", termsQuery);
+    constantScoreQueryParams.put("filter", termsQuery);
 
     // Add the constant score query to the parent
     parent.put(ConstantScoreQueryBuilder.NAME, constantScoreQueryParams);

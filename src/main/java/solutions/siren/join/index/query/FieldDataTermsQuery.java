@@ -221,21 +221,28 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
 
       IndexNumericFieldData numericFieldData = (IndexNumericFieldData) fieldData;
       if (!numericFieldData.getNumericType().isFloatingPoint()) {
-//        final SortedNumericDocValues values = numericFieldData.load(context).getLongValues(); // load fielddata
-//        return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
-//          @Override
-//          protected boolean matchDoc(int doc) throws IOException {
-//            values.advanceExact(doc);
-//            final int numVals = values.docValueCount();
-//            for (int i = 0; i < numVals; i++) {
-//              if (termsSet.contains(values.nextValue())) {
-//                return true;
-//              }
-//            }
-//
-//            return false;
-//          }
-//        };
+        final SortedNumericDocValues values = numericFieldData.load(context).getLongValues(); // load fielddata
+        return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
+          @Override
+          protected boolean matchDoc(int doc) {
+            try {
+              if (!values.advanceExact(doc)) {
+                return false;
+              }
+              final int numVals = values.docValueCount();
+              for (int i = 0; i < numVals; i++) {
+                if (termsSet.contains(values.nextValue())) {
+                  return true;
+                }
+              }
+
+              return false;
+            } catch (IOException e) {
+              logger.error("matchDoc error", e);
+              return false;
+            }
+          }
+        };
       }
 
       // only get here if wrong fielddata type in which case
@@ -287,23 +294,29 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
       if (termsSet == null || termsSet.isEmpty()) return null;
 
       final SortedBinaryDocValues values = fieldData.load(context).getBytesValues(); // load fielddata
-      return null;
-//     return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
-//        @Override
-//        protected boolean matchDoc(int doc) throws IOException {
-//          values.advanceExact(doc);
-//          final int numVals = values.docValueCount();
-//          for (int i = 0; i < numVals; i++) {
-//            final BytesRef term = values.nextValue();
-//            long termHash = LongBloomFilter.hash3_x64_128(term.bytes, term.offset, term.length, 0);
-//            if (termsSet.contains(termHash)) {
-//              return true;
-//            }
-//          }
-//
-//          return false;
-//        }
-//      };
+      return new DocValuesDocIdSet(context.reader().maxDoc(), context.reader().getLiveDocs()) {
+        @Override
+        protected boolean matchDoc(int doc) {
+          try {
+            if (!values.advanceExact(doc)) {
+              return false;
+            }
+            final int numVals = values.docValueCount();
+            for (int i = 0; i < numVals; i++) {
+              final BytesRef term = values.nextValue();
+              long termHash = LongBloomFilter.hash3_x64_128(term.bytes, term.offset, term.length, 0);
+              if (termsSet.contains(termHash)) {
+                return true;
+              }
+            }
+
+            return false;
+          } catch (IOException e) {
+            logger.error("matchDoc error", e);
+            return false;
+          }
+        }
+      };
     }
 
   }

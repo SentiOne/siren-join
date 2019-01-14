@@ -248,10 +248,11 @@ public class FilterJoinBuilder extends AbstractQueryBuilder<FilterJoinBuilder> {
               query = Optional.empty();
             } else {
               try {
-				query = Optional.ofNullable(AbstractQueryBuilder.parseInnerQueryBuilder(parser));
-			  } catch (Exception e) {
-				query = Optional.empty();
-			  }
+                query = Optional.ofNullable(parseInnerQueryBuilder(parser));
+              } catch (Exception e) {
+              	e.printStackTrace();
+                query = Optional.empty();
+              }
             }
           } else if ("orderBy".equals(currentFieldName)) {
             orderBy = Enum.valueOf(TermsByQueryRequest.Ordering.class, parser.text());

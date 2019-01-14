@@ -18,6 +18,7 @@
  */
 package solutions.siren.join.action.coordinate;
 
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchAction;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -29,6 +30,11 @@ public class CoordinateSearchRequestBuilder extends SearchRequestBuilder {
   public CoordinateSearchRequestBuilder(final ElasticsearchClient client) {
     // hack to be able to subclass SearchRequestBuilder: the action instance is only used in #execute which we overwrite
     super(client, SearchAction.INSTANCE);
+  }
+
+  @Override
+  public ActionFuture<SearchResponse> execute() {
+    return client.execute(CoordinateSearchAction.INSTANCE, request);
   }
 
   @Override
