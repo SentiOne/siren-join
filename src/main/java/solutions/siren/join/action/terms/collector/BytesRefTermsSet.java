@@ -18,6 +18,7 @@
  */
 package solutions.siren.join.action.terms.collector;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.ByteBlockPool;
 import org.apache.lucene.util.BytesRef;
@@ -26,7 +27,6 @@ import org.apache.lucene.util.Counter;
 import org.elasticsearch.common.breaker.CircuitBreaker;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.logging.Loggers;
 import solutions.siren.join.action.terms.TermsByQueryRequest;
 import solutions.siren.join.common.Bytes;
 
@@ -47,7 +47,7 @@ public class BytesRefTermsSet extends TermsSet {
    */
   private static final int HEADER_SIZE = 9;
 
-  private static final Logger logger = Loggers.getLogger(BytesRefTermsSet.class);
+  private static final Logger logger = LogManager.getLogger(BytesRefTermsSet.class);
 
   public BytesRefTermsSet(final CircuitBreaker breaker) {
     super(breaker);

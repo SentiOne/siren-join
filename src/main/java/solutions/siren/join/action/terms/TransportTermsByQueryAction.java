@@ -120,8 +120,10 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
    */
   @Override
   protected TermsByQueryShardRequest newShardRequest(int numShards, ShardRouting shard, TermsByQueryRequest request) {
+    ClusterState clusterState = clusterService.state();
+    Set<String> indicesAndAliases = indexNameExpressionResolver.resolveExpressions(clusterState, request.indices());
     return new TermsByQueryShardRequest(shard.shardId(), searchService.buildAliasFilter(clusterService.state(),
-            shard.index().getName(), request.indices()), request);
+            shard.index().getName(), indicesAndAliases), request);
   }
 
   /**

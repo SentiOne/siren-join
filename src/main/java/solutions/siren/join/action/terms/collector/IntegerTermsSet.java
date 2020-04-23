@@ -22,12 +22,12 @@ import com.carrotsearch.hppc.BufferAllocationException;
 import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.breaker.CircuitBreaker;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.logging.Loggers;
 import solutions.siren.join.action.terms.TermsByQueryRequest;
 import solutions.siren.join.common.Bytes;
 import solutions.siren.join.common.Math;
@@ -45,7 +45,7 @@ public class IntegerTermsSet extends NumericTermsSet {
    */
   private static final int HEADER_SIZE = 9;
 
-  private static final Logger logger = Loggers.getLogger(IntegerTermsSet.class);
+  private static final Logger logger = LogManager.getLogger(IntegerTermsSet.class);
 
   public IntegerTermsSet(final CircuitBreaker breaker) {
     super(breaker);

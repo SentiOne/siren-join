@@ -18,13 +18,13 @@
  */
 package solutions.siren.join.action.coordinate.tasks;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.search.SearchAction;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -40,7 +40,7 @@ import solutions.siren.join.action.terms.TermsByQueryRequest;
  */
 public class CardinalityEstimationTask implements NodeTask {
 
-  protected static final Logger logger = Loggers.getLogger(CardinalityEstimationTask.class);
+  protected static final Logger logger = LogManager.getLogger(CardinalityEstimationTask.class);
 
   @Override
   public void execute(NodeTaskContext context, NodeTaskReporter reporter) {

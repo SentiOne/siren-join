@@ -18,6 +18,7 @@
  */
 package solutions.siren.join.action.coordinate.execution;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.action.ActionRequest;
@@ -38,7 +39,6 @@ import solutions.siren.join.index.query.FieldDataTermsQueryBuilder;
 import solutions.siren.join.index.query.FilterJoinBuilder;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.logging.Loggers;
 import solutions.siren.join.index.query.TermsEnumTermsQueryBuilder;
 
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class FilterJoinVisitor {
    */
   private final FilterJoinCache cache;
 
-  private static final Logger logger = Loggers.getLogger(FilterJoinVisitor.class);
+  private static final Logger logger = LogManager.getLogger(FilterJoinVisitor.class);
 
   public FilterJoinVisitor(Client client, RootNode root, FilterJoinCache cache, ActionRequest parentRequest) {
     this.parentRequest = parentRequest;

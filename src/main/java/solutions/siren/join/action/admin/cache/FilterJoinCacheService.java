@@ -18,18 +18,16 @@
  */
 package solutions.siren.join.action.admin.cache;
 
-import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import solutions.siren.join.action.coordinate.execution.FilterJoinCache;
 
-public class FilterJoinCacheService extends AbstractComponent {
+public class FilterJoinCacheService {
 
   private final FilterJoinCache cache;
 
   @Inject
   public FilterJoinCacheService(Settings settings) {
-    super(settings);
     this.cache = new FilterJoinCache(settings);
   }
 

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
@@ -29,7 +30,6 @@ import org.apache.lucene.util.Accountable;
 import org.apache.lucene.util.AttributeSource;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.RamUsageEstimator;
-import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.fielddata.IndexNumericFieldData;
 import org.elasticsearch.index.fielddata.SortedBinaryDocValues;
@@ -67,7 +67,7 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
    */
   protected final long cacheKey;
 
-  private static final Logger logger = Loggers.getLogger(FieldDataTermsQuery.class);
+  private static final Logger logger = LogManager.getLogger(FieldDataTermsQuery.class);
 
   /**
    * Get a {@link FieldDataTermsQuery} that filters on non-floating point numeric terms found in a hppc
@@ -257,7 +257,7 @@ public abstract class FieldDataTermsQuery extends Query implements Accountable {
    */
   protected static class BytesFieldDataTermsQuery extends FieldDataTermsQuery {
 
-    private final Logger logger = Loggers.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Creates a new {@link BytesFieldDataTermsQuery} from the given field data.

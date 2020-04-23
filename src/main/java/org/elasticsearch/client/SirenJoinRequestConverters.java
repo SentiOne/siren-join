@@ -9,7 +9,7 @@ import java.util.Map;
 public class SirenJoinRequestConverters {
 
 	public static Request coordinateSearch(SearchRequest searchRequest) throws IOException {
-		Request baseRequest = RequestConverters.search(searchRequest);
+		Request baseRequest = RequestConverters.search(searchRequest, "_coordinate_search");
 		Request request = new Request(baseRequest.getMethod(), RequestConverters.endpoint(searchRequest.indices(), searchRequest.types(), "_coordinate_search"));
 		for (Map.Entry<String, String> entry : baseRequest.getParameters().entrySet()) {
 			if (!RestSearchAction.TYPED_KEYS_PARAM.equals(entry.getKey())) {

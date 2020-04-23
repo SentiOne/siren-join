@@ -22,12 +22,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.Weigher;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Streamable;
-import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Settings;
 import solutions.siren.join.action.coordinate.model.FilterJoinNode;
 import solutions.siren.join.action.coordinate.model.FilterJoinTerms;
@@ -51,7 +51,7 @@ public class FilterJoinCache {
   public final static String SIREN_FILTERJOIN_CACHE_ENABLED = "siren.filterjoin.cache.enabled";
   public final static String SIREN_FILTERJOIN_CACHE_SIZE = "siren.filterjoin.cache.size";
 
-  private static final Logger logger = Loggers.getLogger(FilterJoinCache.class);
+  private static final Logger logger = LogManager.getLogger(FilterJoinCache.class);
 
   public FilterJoinCache(Settings settings) {
     boolean isEnabled = settings.getAsBoolean(SIREN_FILTERJOIN_CACHE_ENABLED, true);
