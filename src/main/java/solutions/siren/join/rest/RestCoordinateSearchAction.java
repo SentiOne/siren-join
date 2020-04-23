@@ -32,11 +32,22 @@ import org.elasticsearch.rest.action.search.RestSearchAction;
 import solutions.siren.join.action.coordinate.CoordinateSearchAction;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.elasticsearch.rest.RestRequest.Method.GET;
 import static org.elasticsearch.rest.RestRequest.Method.POST;
 
 public class RestCoordinateSearchAction extends BaseRestHandler {
+
+  private static final Set<String> RESPONSE_PARAMS;
+
+  static {
+    final Set<String> responseParams = new HashSet<>(Arrays.asList(RestSearchAction.TYPED_KEYS_PARAM, RestSearchAction.TOTAL_HIT_AS_INT_PARAM));
+    RESPONSE_PARAMS = Collections.unmodifiableSet(responseParams);
+  }
 
   @Inject
   public RestCoordinateSearchAction(final Settings settings, final RestController controller) {
@@ -83,5 +94,10 @@ public class RestCoordinateSearchAction extends BaseRestHandler {
   @Override
   public boolean canTripCircuitBreaker() {
     return false;
+  }
+
+  @Override
+  protected Set<String> responseParams() {
+    return RESPONSE_PARAMS;
   }
 }
