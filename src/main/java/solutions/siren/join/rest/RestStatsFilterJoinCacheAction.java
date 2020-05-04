@@ -18,10 +18,8 @@
  */
 package solutions.siren.join.rest;
 
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
@@ -34,8 +32,7 @@ import java.io.IOException;
 public class RestStatsFilterJoinCacheAction extends BaseRestHandler {
 
   @Inject
-  public RestStatsFilterJoinCacheAction(final Settings settings, final RestController controller) {
-    super(settings);
+  public RestStatsFilterJoinCacheAction(final RestController controller) {
     controller.registerHandler(RestRequest.Method.POST, "/_filter_join/cache/stats", this);
     controller.registerHandler(RestRequest.Method.GET, "/_filter_join/cache/stats", this);
   }

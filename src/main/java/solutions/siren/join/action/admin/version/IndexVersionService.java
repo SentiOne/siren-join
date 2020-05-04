@@ -20,10 +20,7 @@ package solutions.siren.join.action.admin.version;
 
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.shard.AbstractIndexShardComponent;
-import org.elasticsearch.index.shard.IndexingOperationListener;
 import org.elasticsearch.index.shard.ShardId;
 
 import java.util.Map;
@@ -34,8 +31,7 @@ public class IndexVersionService extends AbstractLifecycleComponent {
     private final Map<Index, IndexVersionEventListener> indexToVersionEventListenerMapping;
 
     @Inject
-    public IndexVersionService(Settings settings) {
-        super(settings);
+    public IndexVersionService() {
         this.indexToVersionEventListenerMapping = new ConcurrentHashMap<>();
     }
 

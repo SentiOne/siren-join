@@ -29,11 +29,14 @@ public class ClearFilterJoinCacheNodeResponse extends BaseNodeResponse {
 
   private long timestamp;
 
-  ClearFilterJoinCacheNodeResponse() {}
-
   ClearFilterJoinCacheNodeResponse(DiscoveryNode node, long timestamp) {
     super(node);
     this.timestamp = timestamp;
+  }
+
+  ClearFilterJoinCacheNodeResponse(StreamInput in) throws IOException {
+    super(in);
+    timestamp = in.readVLong();
   }
 
   public long getTimestamp() {
@@ -41,15 +44,7 @@ public class ClearFilterJoinCacheNodeResponse extends BaseNodeResponse {
   }
 
   public static ClearFilterJoinCacheNodeResponse readNodeInfo(StreamInput in) throws IOException {
-    ClearFilterJoinCacheNodeResponse nodeInfo = new ClearFilterJoinCacheNodeResponse();
-    nodeInfo.readFrom(in);
-    return nodeInfo;
-  }
-
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    timestamp = in.readVLong();
+    return new ClearFilterJoinCacheNodeResponse(in);
   }
 
   @Override

@@ -117,8 +117,8 @@ public class TopHitStream extends HitStream {
     }
 
     @Override
-    public boolean needsScores() {
-      return true;
+    public ScoreMode scoreMode() {
+      return ScoreMode.COMPLETE_NO_SCORES;
     }
 
     @Override
@@ -127,10 +127,10 @@ public class TopHitStream extends HitStream {
       final int docBase = context.docBase;
       return new LeafCollector() {
 
-        Scorer scorer;
+        Scorable scorer;
 
         @Override
-        public void setScorer(Scorer scorer) throws IOException {
+        public void setScorer(Scorable scorer) throws IOException {
           this.scorer = scorer;
         }
 

@@ -18,26 +18,15 @@
  */
 package solutions.siren.join.action.admin.cache;
 
-import org.elasticsearch.action.Action;
-import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.action.ActionType;
 
-public class StatsFilterJoinCacheAction extends Action<StatsFilterJoinCacheRequest, StatsFilterJoinCacheResponse, StatsFilterJoinCacheRequestBuilder> {
+public class StatsFilterJoinCacheAction extends ActionType<StatsFilterJoinCacheResponse> {
 
   public static final StatsFilterJoinCacheAction INSTANCE = new StatsFilterJoinCacheAction();
   public static final String NAME = "cluster:admin/filterjoin/cache/stats";
 
   protected StatsFilterJoinCacheAction() {
-    super(NAME);
-  }
-
-  @Override
-  public StatsFilterJoinCacheRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-    return new StatsFilterJoinCacheRequestBuilder(client, this);
-  }
-
-  @Override
-  public StatsFilterJoinCacheResponse newResponse() {
-    return new StatsFilterJoinCacheResponse();
+    super(NAME, StatsFilterJoinCacheResponse::new);
   }
 
 }

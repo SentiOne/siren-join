@@ -21,7 +21,7 @@ package solutions.siren.join.action.admin.cache;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.client.ElasticsearchClient;
 
-public class StatsFilterJoinCacheRequestBuilder extends ActionRequestBuilder<StatsFilterJoinCacheRequest, StatsFilterJoinCacheResponse, StatsFilterJoinCacheRequestBuilder> {
+public class StatsFilterJoinCacheRequestBuilder extends ActionRequestBuilder<StatsFilterJoinCacheRequest, StatsFilterJoinCacheResponse> {
 
   public StatsFilterJoinCacheRequestBuilder(ElasticsearchClient client, StatsFilterJoinCacheAction action) {
     super(client, action, new StatsFilterJoinCacheRequest());

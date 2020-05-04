@@ -31,12 +31,16 @@ public class StatsFilterJoinCacheNodeResponse extends BaseNodeResponse {
   private long timestamp;
   private FilterJoinCache.FilterJoinCacheStats cacheStats;
 
-  StatsFilterJoinCacheNodeResponse() {}
-
   StatsFilterJoinCacheNodeResponse(DiscoveryNode node, long timestamp, FilterJoinCache.FilterJoinCacheStats cacheStats) {
     super(node);
     this.timestamp = timestamp;
     this.cacheStats = cacheStats;
+  }
+
+  StatsFilterJoinCacheNodeResponse(StreamInput in) throws IOException {
+    super(in);
+    timestamp = in.readVLong();
+    cacheStats = new FilterJoinCache.FilterJoinCacheStats(in);
   }
 
   public long getTimestamp() {
@@ -48,17 +52,7 @@ public class StatsFilterJoinCacheNodeResponse extends BaseNodeResponse {
   }
 
   public static StatsFilterJoinCacheNodeResponse readNodeStats(StreamInput in) throws IOException {
-    StatsFilterJoinCacheNodeResponse nodeStats = new StatsFilterJoinCacheNodeResponse();
-    nodeStats.readFrom(in);
-    return nodeStats;
-  }
-
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    timestamp = in.readVLong();
-    cacheStats = new FilterJoinCache.FilterJoinCacheStats();
-    cacheStats.readFrom(in);
+    return new StatsFilterJoinCacheNodeResponse(in);
   }
 
   @Override

@@ -21,14 +21,13 @@ package solutions.siren.join.action.admin.cache;
 import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.nodes.TransportNodesAction;
-import org.elasticsearch.cluster.ClusterName;
-import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 
+import java.io.IOException;
 import java.util.List;
 
 public class TransportClearFilterJoinCacheAction extends TransportNodesAction<ClearFilterJoinCacheRequest,
@@ -38,13 +37,12 @@ public class TransportClearFilterJoinCacheAction extends TransportNodesAction<Cl
   private final FilterJoinCacheService cacheService;
 
   @Inject
-  public TransportClearFilterJoinCacheAction(Settings settings, ThreadPool threadPool,
+  public TransportClearFilterJoinCacheAction(ThreadPool threadPool,
                                                 ClusterService clusterService, FilterJoinCacheService cacheService,
-                                                TransportService transportService, ActionFilters actionFilters,
-                                                IndexNameExpressionResolver indexNameExpressionResolver) {
-    super(settings, ClearFilterJoinCacheAction.NAME, threadPool, clusterService, transportService,
-            actionFilters, indexNameExpressionResolver, ClearFilterJoinCacheRequest::new,
-            ClearFilterJoinCacheNodeRequest::new, ThreadPool.Names.MANAGEMENT, ClearFilterJoinCacheNodeResponse.class);
+                                                TransportService transportService, ActionFilters actionFilters) {
+    super(ClearFilterJoinCacheAction.NAME, threadPool, clusterService, transportService,
+            actionFilters, ClearFilterJoinCacheRequest::new, ClearFilterJoinCacheNodeRequest::new,
+            ThreadPool.Names.MANAGEMENT, ClearFilterJoinCacheNodeResponse.class);
     this.cacheService = cacheService;
     this.clusterService = clusterService;
   }
@@ -57,13 +55,13 @@ public class TransportClearFilterJoinCacheAction extends TransportNodesAction<Cl
   }
 
   @Override
-  protected ClearFilterJoinCacheNodeRequest newNodeRequest(String nodeId, ClearFilterJoinCacheRequest request) {
-    return new ClearFilterJoinCacheNodeRequest(nodeId, request);
+  protected ClearFilterJoinCacheNodeRequest newNodeRequest(ClearFilterJoinCacheRequest request) {
+    return new ClearFilterJoinCacheNodeRequest(request);
   }
 
   @Override
-  protected ClearFilterJoinCacheNodeResponse newNodeResponse() {
-    return new ClearFilterJoinCacheNodeResponse();
+  protected ClearFilterJoinCacheNodeResponse newNodeResponse(StreamInput in) throws IOException {
+    return new ClearFilterJoinCacheNodeResponse(in);
   }
 
   @Override

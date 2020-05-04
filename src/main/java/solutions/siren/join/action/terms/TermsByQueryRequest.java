@@ -18,7 +18,6 @@
  */
 package solutions.siren.join.action.terms;
 
-import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestValidationException;
 import org.elasticsearch.action.ValidateActions;
 import org.elasticsearch.action.support.broadcast.BroadcastRequest;
@@ -29,11 +28,9 @@ import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.cbor.CborXContent;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -71,6 +68,42 @@ public class TermsByQueryRequest extends BroadcastRequest<TermsByQueryRequest> {
   public static final TermsEncoding DEFAULT_TERM_ENCODING = TermsEncoding.LONG;
 
   public TermsByQueryRequest() {}
+
+  public TermsByQueryRequest(StreamInput in) throws IOException {
+    super(in);
+
+    routing = in.readOptionalString();
+    preference = in.readOptionalString();
+
+    if (in.readBoolean()) {
+      querySource = in.readBytesReference();
+    } else {
+      querySource = null;
+    }
+
+    if (in.readBoolean()) {
+      types = in.readStringArray();
+    }
+
+    field = in.readString();
+    nowInMillis = in.readVLong();
+
+    if (in.readBoolean()) {
+      ordering = Ordering.values()[in.readVInt()];
+    }
+
+    if (in.readBoolean()) {
+      maxTermsPerShard = in.readVInt();
+    }
+
+    if (in.readBoolean()) {
+      termsEncoding = TermsEncoding.values()[in.readVInt()];
+    }
+
+    if (in.readBoolean()) {
+      expectedTerms = in.readVLong();
+    }
+  }
 
   /**
    * Constructs a new terms by query request against the provided indices. No indices provided means it will run against all indices.
@@ -285,50 +318,6 @@ public class TermsByQueryRequest extends BroadcastRequest<TermsByQueryRequest> {
    */
   public Long expectedTerms() {
     return expectedTerms;
-  }
-
-
-  /**
-   * Deserialize
-   *
-   * @param in the input
-   * @throws IOException
-   */
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-
-    routing = in.readOptionalString();
-    preference = in.readOptionalString();
-
-    if (in.readBoolean()) {
-      querySource = in.readBytesReference();
-    } else {
-      querySource = null;
-    }
-
-    if (in.readBoolean()) {
-      types = in.readStringArray();
-    }
-
-    field = in.readString();
-    nowInMillis = in.readVLong();
-
-    if (in.readBoolean()) {
-      ordering = Ordering.values()[in.readVInt()];
-    }
-
-    if (in.readBoolean()) {
-      maxTermsPerShard = in.readVInt();
-    }
-
-    if (in.readBoolean()) {
-      termsEncoding = TermsEncoding.values()[in.readVInt()];
-    }
-
-    if (in.readBoolean()) {
-      expectedTerms = in.readVLong();
-    }
   }
 
   /**

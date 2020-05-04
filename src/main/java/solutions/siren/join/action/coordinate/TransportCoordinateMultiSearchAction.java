@@ -25,18 +25,17 @@ import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.block.ClusterBlockLevel;
-import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.AtomicArray;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.cbor.CborXContent;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import solutions.siren.join.action.admin.cache.FilterJoinCacheService;
@@ -67,21 +66,20 @@ public class TransportCoordinateMultiSearchAction extends BaseTransportCoordinat
   private final FilterJoinCacheService cacheService;
 
   @Inject
-  public TransportCoordinateMultiSearchAction(Settings settings, ThreadPool threadPool,
+  public TransportCoordinateMultiSearchAction(ThreadPool threadPool,
                                               TransportService transportService, ClusterService clusterService,
                                               FilterJoinCacheService cacheService,
                                               TransportSearchAction search, ActionFilters actionFilters,
-                                              IndexNameExpressionResolver indexNameExpressionResolver, Client client,
-                                              NamedXContentRegistry xContentRegistry) {
-    super(settings, CoordinateMultiSearchAction.NAME, threadPool, transportService, actionFilters,
-            indexNameExpressionResolver, client, xContentRegistry, MultiSearchRequest::new);
+                                              Client client, NamedXContentRegistry xContentRegistry) {
+    super(CoordinateMultiSearchAction.NAME, threadPool, transportService, actionFilters,
+            client, xContentRegistry, MultiSearchRequest::new);
     this.searchAction = search;
     this.clusterService = clusterService;
     this.cacheService = cacheService;
   }
 
   @Override
-  protected void doExecute(final MultiSearchRequest request, final ActionListener<MultiSearchResponse> listener) {
+  protected void doExecute(final Task task, final MultiSearchRequest request, final ActionListener<MultiSearchResponse> listener) {
     logger.debug("{}: Execute coordinated multi-search action", Thread.currentThread().getName());
 
     List<CoordinateSearchMetadata> metadatas = new ArrayList<>(request.requests().size());

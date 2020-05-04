@@ -60,6 +60,15 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
       super(null, null); // hack: empty constructor is private, use this one instead
     }
 
+    Item(StreamInput in) throws IOException {
+      super(null, null); // hack: empty constructor since we can't use parent's private variables.
+      if (in.readBoolean()) {
+        this.response = new CoordinateSearchResponse(in);
+      } else {
+        failureMessage = in.readString();
+      }
+    }
+
     public Item(SearchResponse response, String failureMessage) {
       super(null, null); // hack: empty constructor since we can't use parent's private variables.
       this.response = response;
@@ -90,19 +99,7 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
     }
 
     public static Item readItem(StreamInput in) throws IOException {
-      Item item = new Item();
-      item.readFrom(in);
-      return item;
-    }
-
-    @Override
-    public void readFrom(StreamInput in) throws IOException {
-      if (in.readBoolean()) {
-        this.response = new CoordinateSearchResponse();
-        response.readFrom(in);
-      } else {
-        failureMessage = in.readString();
-      }
+      return new Item(in);
     }
 
     @Override
@@ -122,11 +119,19 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
   CoordinateMultiSearchResponse() {
     // hack: empty constructor is private, use this one instead
     // we use an empty array to avoid NPE during serialization
-    super(new MultiSearchResponse.Item[0]);
+    super(new MultiSearchResponse.Item[0], 0);
+  }
+
+  CoordinateMultiSearchResponse(StreamInput in) throws IOException {
+    super(in);
+    items = new Item[in.readVInt()];
+    for (int i = 0; i < items.length; i++) {
+      items[i] = Item.readItem(in);
+    }
   }
 
   public CoordinateMultiSearchResponse(Item[] items) {
-    super(new MultiSearchResponse.Item[0]); // hack: empty constructor is private
+    super(new MultiSearchResponse.Item[0], 0); // hack: empty constructor is private
     this.items = items;
   }
 
@@ -140,15 +145,6 @@ public class CoordinateMultiSearchResponse extends MultiSearchResponse {
    */
   public Item[] getResponses() {
     return this.items;
-  }
-
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    items = new Item[in.readVInt()];
-    for (int i = 0; i < items.length; i++) {
-      items[i] = Item.readItem(in);
-    }
   }
 
   @Override

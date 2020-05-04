@@ -21,22 +21,24 @@ package solutions.siren.join.action.admin.version;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.io.stream.Writeable;
 
 import java.io.IOException;
 
-public class ShardIndexVersion implements Streamable {
+public class ShardIndexVersion implements Writeable {
 
   private ShardRouting shardRouting;
 
   private long version;
 
-  ShardIndexVersion() {
-  }
-
   ShardIndexVersion(ShardRouting shardRouting, long version) {
     this.shardRouting = shardRouting;
     this.version = version;
+  }
+
+  ShardIndexVersion(StreamInput in) throws IOException {
+    shardRouting = new ShardRouting(in);
+    version = in.readLong();
   }
 
   public ShardRouting getShardRouting() {
@@ -48,21 +50,13 @@ public class ShardIndexVersion implements Streamable {
   }
 
   @Override
-  public void readFrom(StreamInput in) throws IOException {
-    shardRouting = new ShardRouting(in);
-    version = in.readLong();
-  }
-
-  @Override
   public void writeTo(StreamOutput out) throws IOException {
     shardRouting.writeTo(out);
     out.writeLong(version);
   }
 
   public static ShardIndexVersion readShardIndexVersion(StreamInput in) throws IOException {
-    ShardIndexVersion shard = new ShardIndexVersion();
-    shard.readFrom(in);
-    return shard;
+    return new ShardIndexVersion(in);
   }
 
 }

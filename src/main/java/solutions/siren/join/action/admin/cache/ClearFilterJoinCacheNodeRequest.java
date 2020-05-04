@@ -28,18 +28,13 @@ public class ClearFilterJoinCacheNodeRequest extends BaseNodeRequest {
 
   private ClearFilterJoinCacheRequest request;
 
-  public ClearFilterJoinCacheNodeRequest() {}
-
-  public ClearFilterJoinCacheNodeRequest(String nodeId, ClearFilterJoinCacheRequest request) {
-    super(nodeId);
+  public ClearFilterJoinCacheNodeRequest(ClearFilterJoinCacheRequest request) {
     this.request = request;
   }
 
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    request = new ClearFilterJoinCacheRequest();
-    request.readFrom(in);
+  public ClearFilterJoinCacheNodeRequest(StreamInput in) throws IOException {
+    super(in);
+    request = new ClearFilterJoinCacheRequest(in);
   }
 
   @Override

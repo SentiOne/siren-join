@@ -5,7 +5,7 @@
   <groupId>solutions.siren</groupId>
   <artifactId>siren-join</artifactId>
   <name>siren-join</name>
-  <version>6.8.8-SNAPSHOT</version>
+  <version>7.6.2-SNAPSHOT</version>
   <description>SIREn plugin that adds join capabilities to Elasticsearch</description>
   <url>http://github.com/sirensolutions/siren-join</url>
 
@@ -35,8 +35,8 @@
   </scm>
 
   <properties>
-    <lucene.version>7.7.2</lucene.version>
-    <elasticsearch.version>6.8.8</elasticsearch.version>
+    <lucene.version>8.4.0</lucene.version>
+    <elasticsearch.version>7.6.2</elasticsearch.version>
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <siren.tools.directory>${project.basedir}/dev-tools</siren.tools.directory>
@@ -206,6 +206,14 @@
       <artifactId>framework</artifactId>
       <version>${elasticsearch.version}</version>
       <scope>test</scope>
+
+      <exclusions>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest</artifactId>
+        </exclusion>
+      </exclusions>
+
     </dependency>
 
     <!-- <dependency> -->

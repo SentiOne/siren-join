@@ -37,11 +37,17 @@ public class GetIndicesVersionResponse extends BroadcastResponse {
 
   private Map<String, Long> indicesVersions;
 
-  GetIndicesVersionResponse() {}
-
   GetIndicesVersionResponse(ShardIndexVersion[] shards, int totalShards, int successfulShards, int failedShards, List<DefaultShardOperationFailedException> shardFailures) {
     super(totalShards, successfulShards, failedShards, shardFailures);
     this.shards = shards;
+  }
+
+  GetIndicesVersionResponse(StreamInput in) throws IOException {
+    super(in);
+    shards = new ShardIndexVersion[in.readVInt()];
+    for (int i = 0; i < shards.length; i++) {
+      shards[i] = ShardIndexVersion.readShardIndexVersion(in);
+    }
   }
 
   /**
@@ -101,15 +107,6 @@ public class GetIndicesVersionResponse extends BroadcastResponse {
     }
 
     return version;
-  }
-
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    shards = new ShardIndexVersion[in.readVInt()];
-    for (int i = 0; i < shards.length; i++) {
-      shards[i] = ShardIndexVersion.readShardIndexVersion(in);
-    }
   }
 
   @Override

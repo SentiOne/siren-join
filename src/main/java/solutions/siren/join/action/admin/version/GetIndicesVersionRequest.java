@@ -21,6 +21,9 @@ package solutions.siren.join.action.admin.version;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.support.broadcast.BroadcastRequest;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.io.stream.StreamInput;
+
+import java.io.IOException;
 
 /**
  * Request to compute the version of a set of indices.
@@ -43,6 +46,10 @@ public class GetIndicesVersionRequest extends BroadcastRequest<GetIndicesVersion
   public GetIndicesVersionRequest(ActionRequest originalRequest, String... indices) {
     super(indices);
     this.indices(indices);
+  }
+
+  public GetIndicesVersionRequest(StreamInput in) throws IOException {
+    super(in);
   }
 
 }

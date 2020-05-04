@@ -243,7 +243,7 @@ public class FilterJoinBenchmark {
             log("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
         }
 
-        long hits = searchResponse.getHits().totalHits;
+        long hits = searchResponse.getHits().getTotalHits().value;
         if (hits != expectedHits) {
             log("[" + name + "][#" + testNum + "] Hits Mismatch:  expected [" + expectedHits + "], got [" + hits + "]");
         }

@@ -23,7 +23,6 @@ import org.elasticsearch.action.support.nodes.BaseNodesResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
@@ -33,10 +32,12 @@ import java.util.List;
 
 public class ClearFilterJoinCacheResponse extends BaseNodesResponse<ClearFilterJoinCacheNodeResponse> implements ToXContentObject {
 
-  ClearFilterJoinCacheResponse() {}
-
   ClearFilterJoinCacheResponse(ClusterName clusterName, List<ClearFilterJoinCacheNodeResponse> nodes, List<FailedNodeException> failures) {
     super(clusterName, nodes, failures);
+  }
+
+  ClearFilterJoinCacheResponse(StreamInput in) throws IOException {
+    super(in);
   }
 
   @Override

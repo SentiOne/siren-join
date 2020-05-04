@@ -50,7 +50,7 @@ public class TransportGetIndicesVersionAction extends TransportBroadcastByNodeAc
                                           TransportService transportService, IndicesService indicesService,
                                           ActionFilters actionFilters, IndexNameExpressionResolver indexNameExpressionResolver,
                                           IndexVersionService indexVersionService) {
-    super(settings, GetIndicesVersionAction.NAME, threadPool, clusterService, transportService, actionFilters, indexNameExpressionResolver,
+    super(GetIndicesVersionAction.NAME, clusterService, transportService, actionFilters, indexNameExpressionResolver,
             GetIndicesVersionRequest::new, ThreadPool.Names.MANAGEMENT);
     this.indicesService = indicesService;
     this.indexVersionService = indexVersionService;
@@ -68,9 +68,7 @@ public class TransportGetIndicesVersionAction extends TransportBroadcastByNodeAc
 
   @Override
   protected GetIndicesVersionRequest readRequestFrom(StreamInput in) throws IOException {
-    GetIndicesVersionRequest request = new GetIndicesVersionRequest();
-    request.readFrom(in);
-    return request;
+    return new GetIndicesVersionRequest(in);
   }
 
   @Override

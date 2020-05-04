@@ -28,18 +28,13 @@ public class StatsFilterJoinCacheNodeRequest extends BaseNodeRequest {
 
   private StatsFilterJoinCacheRequest request;
 
-  public StatsFilterJoinCacheNodeRequest() {}
-
-  public StatsFilterJoinCacheNodeRequest(String nodeId, StatsFilterJoinCacheRequest request) {
-    super(nodeId);
+  public StatsFilterJoinCacheNodeRequest(StatsFilterJoinCacheRequest request) {
     this.request = request;
   }
 
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    request = new StatsFilterJoinCacheRequest();
-    request.readFrom(in);
+  public StatsFilterJoinCacheNodeRequest(StreamInput in) throws IOException {
+    super(in);
+    request = new StatsFilterJoinCacheRequest(in);
   }
 
   @Override

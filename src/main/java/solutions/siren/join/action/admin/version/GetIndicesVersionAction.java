@@ -18,29 +18,18 @@
  */
 package solutions.siren.join.action.admin.version;
 
-import org.elasticsearch.action.Action;
-import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.action.ActionType;
 
 /**
  * Action to compute the version of a set of indices.
  */
-public class GetIndicesVersionAction extends Action<GetIndicesVersionRequest, GetIndicesVersionResponse, GetIndicesVersionRequestBuilder> {
+public class GetIndicesVersionAction extends ActionType<GetIndicesVersionResponse> {
 
   public static final GetIndicesVersionAction INSTANCE = new GetIndicesVersionAction();
   public static final String NAME = "indices:admin/version/get";
 
   private GetIndicesVersionAction() {
-    super(NAME);
-  }
-
-  @Override
-  public GetIndicesVersionResponse newResponse() {
-    return new GetIndicesVersionResponse();
-  }
-
-  @Override
-  public GetIndicesVersionRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-    return new GetIndicesVersionRequestBuilder(client, this);
+    super(NAME, GetIndicesVersionResponse::new);
   }
 
 }

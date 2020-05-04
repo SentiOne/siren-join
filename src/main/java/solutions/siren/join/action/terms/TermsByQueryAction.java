@@ -18,15 +18,14 @@
  */
 package solutions.siren.join.action.terms;
 
-import org.elasticsearch.action.Action;
-import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.action.ActionType;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.transport.TransportRequestOptions;
 
 /**
  * The action to request terms by query
  */
-public class TermsByQueryAction extends Action<TermsByQueryRequest, TermsByQueryResponse, TermsByQueryRequestBuilder> {
+public class TermsByQueryAction extends ActionType<TermsByQueryResponse> {
 
   public static final TermsByQueryAction INSTANCE = new TermsByQueryAction();
   public static final String NAME = "indices:data/read/search/termsbyquery";
@@ -35,17 +34,7 @@ public class TermsByQueryAction extends Action<TermsByQueryRequest, TermsByQuery
    * Default constructor
    */
   private TermsByQueryAction() {
-    super(NAME);
-  }
-
-  /**
-   * Gets a new {@link TermsByQueryResponse} object
-   *
-   * @return the new {@link TermsByQueryResponse}.
-   */
-  @Override
-  public TermsByQueryResponse newResponse() {
-    return new TermsByQueryResponse();
+    super(NAME, TermsByQueryResponse::new);
   }
 
   /**
@@ -60,17 +49,6 @@ public class TermsByQueryAction extends Action<TermsByQueryRequest, TermsByQuery
     return TransportRequestOptions.builder()
             .withType(TransportRequestOptions.Type.REG)
             .build();
-  }
-
-  /**
-   * Get a new {@link TermsByQueryRequestBuilder}
-   *
-   * @param client the client responsible for executing the request.
-   * @return the new {@link TermsByQueryRequestBuilder}
-   */
-  @Override
-  public TermsByQueryRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-    return new TermsByQueryRequestBuilder(client, this);
   }
 
 }

@@ -19,16 +19,12 @@
 package solutions.siren.join.rest;
 
 import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.node.NodeClient;
-import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.action.RestActions;
 import org.elasticsearch.rest.action.RestToXContentListener;
 import org.elasticsearch.rest.action.search.RestMultiSearchAction;
 import solutions.siren.join.action.coordinate.CoordinateMultiSearchAction;
@@ -44,7 +40,6 @@ public class RestCoordinateMultiSearchAction extends BaseRestHandler {
 
   @Inject
   public RestCoordinateMultiSearchAction(final Settings settings, final RestController controller) {
-    super(settings);
     controller.registerHandler(GET, "/_coordinate_msearch", this);
     controller.registerHandler(POST, "/_coordinate_msearch", this);
     controller.registerHandler(GET, "/{index}/_coordinate_msearch", this);

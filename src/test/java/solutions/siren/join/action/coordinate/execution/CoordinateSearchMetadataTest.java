@@ -22,10 +22,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.common.bytes.BytesArray;
-import org.elasticsearch.common.network.NetworkModule;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -50,10 +49,8 @@ import static solutions.siren.join.index.query.QueryBuilders.filterJoin;
 public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
 
   @Override
-  protected Settings nodeSettings(int nodeOrdinal) {
-    return Settings.builder()
-            .put("force.http.enabled", true) // enable http for these tests
-            .put(super.nodeSettings(nodeOrdinal)).build();
+  protected boolean addMockHttpTransport() {
+    return false;
   }
 
   private abstract class ExpectedAction {
@@ -164,7 +161,9 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
             ).maxTermsPerShard(42)).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
 
@@ -214,7 +213,9 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
             ).termsEncoding(TermsByQueryRequest.TermsEncoding.INTEGER)).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
 
@@ -264,7 +265,9 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
             ).orderBy(TermsByQueryRequest.Ordering.DOC_SCORE).maxTermsPerShard(10)).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
 
@@ -315,7 +318,9 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
                 ).termsEncoding(TermsByQueryRequest.TermsEncoding.LONG)).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
 
@@ -378,7 +383,9 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
                   ).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
 
@@ -446,18 +453,20 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
     // Execute a first time to add the action to the cache
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
     // Only one document contains a odd document id as foreign key.
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(1));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(1));
 
     // Execute a second time to hit the cache
-    response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
     // Only one document contains a odd document id as foreign key.
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(1));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(1));
 
     String key = CoordinateSearchMetadata.Fields.COORDINATE_SEARCH;
     Map coordinateSearch = (Map) map.get(key);
@@ -529,13 +538,15 @@ public class CoordinateSearchMetadataTest extends SirenJoinTestCase {
 
     HttpEntity entity = new NStringEntity(body, ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_msearch", Collections.emptyMap(), entity);
+    Request request = new Request("GET", "/_coordinate_msearch");
+    request.setEntity(entity);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
     ArrayList responses = (ArrayList) map.get("responses");
     assertThat(responses.size(), equalTo(2));
-    assertThat((Integer) ((Map) ((Map) responses.get(0)).get("hits")).get("total"), equalTo(3));
-    assertThat((Integer) ((Map) ((Map) responses.get(1)).get("hits")).get("total"), equalTo(3));
+    assertThat((Integer) ((Map) ((Map)((Map) responses.get(0)).get("hits")).get("total")).get("value"), equalTo(3));
+    assertThat((Integer) ((Map) ((Map)((Map) responses.get(1)).get("hits")).get("total")).get("value"), equalTo(3));
 
     // First query
     String key = CoordinateSearchMetadata.Fields.COORDINATE_SEARCH;

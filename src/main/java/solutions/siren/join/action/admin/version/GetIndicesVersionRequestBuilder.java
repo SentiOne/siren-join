@@ -21,7 +21,7 @@ package solutions.siren.join.action.admin.version;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.client.ElasticsearchClient;
 
-public class GetIndicesVersionRequestBuilder extends ActionRequestBuilder<GetIndicesVersionRequest, GetIndicesVersionResponse, GetIndicesVersionRequestBuilder> {
+public class GetIndicesVersionRequestBuilder extends ActionRequestBuilder<GetIndicesVersionRequest, GetIndicesVersionResponse> {
 
   public GetIndicesVersionRequestBuilder(ElasticsearchClient client, GetIndicesVersionAction action) {
     super(client, action, new GetIndicesVersionRequest());

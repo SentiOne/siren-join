@@ -18,27 +18,26 @@
  */
 package solutions.siren.join.action.terms;
 
+import org.elasticsearch.action.OriginalIndices;
 import org.elasticsearch.action.support.broadcast.TransportBroadcastAction;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.breaker.CircuitBreaker;
-import org.elasticsearch.common.util.PageCacheRecycler;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.xcontent.LoggingDeprecationHandler;
-import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
+import org.elasticsearch.search.SearchException;
 import org.elasticsearch.search.SearchService;
-import org.elasticsearch.search.internal.AliasFilter;
 import org.elasticsearch.tasks.Task;
 import solutions.siren.join.action.terms.collector.*;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.DefaultShardOperationFailedException;
 import org.elasticsearch.action.support.broadcast.BroadcastShardOperationFailedException;
@@ -49,20 +48,16 @@ import org.elasticsearch.cluster.routing.GroupShardsIterator;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.query.ParsedQuery;
-import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.script.ScriptService;
-import org.elasticsearch.search.SearchContextException;
 import org.elasticsearch.search.SearchShardTarget;
 import org.elasticsearch.search.internal.SearchContext;
-import org.elasticsearch.search.internal.ShardSearchLocalRequest;
 import org.elasticsearch.search.internal.ShardSearchRequest;
 import org.elasticsearch.search.query.QueryPhaseExecutionException;
 import org.elasticsearch.threadpool.ThreadPool;
@@ -88,13 +83,13 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
    * Constructor
    */
   @Inject
-  public TransportTermsByQueryAction(Settings settings, ThreadPool threadPool, ClusterService clusterService,
+  public TransportTermsByQueryAction(ClusterService clusterService,
                                      TransportService transportService, SearchService searchService, IndicesService indicesService,
                                      CircuitBreakerService breakerService,
                                      ScriptService scriptService,
                                      BigArrays bigArrays, ActionFilters actionFilters,
                                      IndexNameExpressionResolver indexNameExpressionResolver, Client client) {
-    super(settings, TermsByQueryAction.NAME, threadPool, clusterService, transportService, actionFilters,
+    super(TermsByQueryAction.NAME, clusterService, transportService, actionFilters,
             indexNameExpressionResolver, TermsByQueryRequest::new, TermsByQueryShardRequest::new,
             // Use the generic threadpool which is cached, as we can end up with deadlock with the SEARCH threadpool
             ThreadPool.Names.GENERIC);
@@ -126,12 +121,9 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
             shard.index().getName(), indicesAndAliases), request);
   }
 
-  /**
-   * Creates a new {@link TermsByQueryShardResponse}
-   */
   @Override
-  protected TermsByQueryShardResponse newShardResponse() {
-    return new TermsByQueryShardResponse(breakerService.getBreaker(CircuitBreaker.REQUEST));
+  protected TermsByQueryShardResponse readShardResponse(StreamInput streamInput) throws IOException {
+    return new TermsByQueryShardResponse(breakerService.getBreaker(CircuitBreaker.REQUEST), streamInput);
   }
 
   /**
@@ -238,18 +230,18 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
     OrderByShardOperation orderByOperation = OrderByShardOperation.get(request.getOrderBy(), request.maxTermsPerShard());
 
     SearchShardTarget shardTarget = new SearchShardTarget(clusterService.localNode().getId(),
-                                                          shardRequest.shardId().getIndex(),
-                                                          shardRequest.shardId().id(),
-                                                          clusterService.getClusterName().value());
+                                                          shardRequest.shardId(),
+                                                          clusterService.getClusterName().value(),
+                                                          OriginalIndices.NONE);
 
-    ShardSearchRequest shardSearchRequest = new ShardSearchLocalRequest(shardRequest.shardId(), request.types(), request.nowInMillis(),
+    ShardSearchRequest shardSearchRequest = new ShardSearchRequest(shardRequest.shardId(), request.types(), request.nowInMillis(),
                                                                         shardRequest.filteringAliases());
     SearchContext context = searchService.createSearchContext(shardSearchRequest, SearchService.NO_TIMEOUT);
 
     try {
       MappedFieldType fieldType = context.smartNameFieldType(request.field());
       if (fieldType == null) {
-        throw new SearchContextException(context, "[termsByQuery] field '" + request.field() +
+        throw new SearchException(shardTarget, "[termsByQuery] field '" + request.field() +
                 "' not found for types " + Arrays.toString(request.types()));
       }
 
@@ -293,7 +285,7 @@ public class TransportTermsByQueryAction extends TransportBroadcastAction<TermsB
     }
     catch (Throwable e) {
       logger.error("[termsByQuery] Error executing shard operation", e);
-      throw new QueryPhaseExecutionException(context, "[termsByQuery] Failed to execute query", e);
+      throw new QueryPhaseExecutionException(shardTarget, "[termsByQuery] Failed to execute query", e);
     }
     finally {
       // this will also release the index searcher

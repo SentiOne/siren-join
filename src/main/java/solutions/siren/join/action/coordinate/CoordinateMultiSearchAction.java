@@ -18,28 +18,16 @@
  */
 package solutions.siren.join.action.coordinate;
 
-import org.elasticsearch.action.Action;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.action.ActionType;
+import org.elasticsearch.action.search.MultiSearchResponse;
 
-public class CoordinateMultiSearchAction extends Action<MultiSearchRequest, MultiSearchResponse, MultiSearchRequestBuilder> {
+public class CoordinateMultiSearchAction extends ActionType<MultiSearchResponse> {
 
   public static final CoordinateMultiSearchAction INSTANCE = new CoordinateMultiSearchAction();
   public static final String NAME = "indices:data/read/coordinate-msearch";
 
   private CoordinateMultiSearchAction() {
-    super(NAME);
-  }
-
-  @Override
-  public MultiSearchRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-    return new CoordinateMultiSearchRequestBuilder(client);
-  }
-
-  @Override
-  public MultiSearchResponse newResponse() {
-    return new CoordinateMultiSearchResponse();
+    super(NAME, CoordinateMultiSearchResponse::new);
   }
 
 }

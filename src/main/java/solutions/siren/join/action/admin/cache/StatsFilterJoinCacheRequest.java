@@ -19,9 +19,18 @@
 package solutions.siren.join.action.admin.cache;
 
 import org.elasticsearch.action.support.nodes.BaseNodesRequest;
+import org.elasticsearch.common.io.stream.StreamInput;
+
+import java.io.IOException;
 
 public class StatsFilterJoinCacheRequest extends BaseNodesRequest<StatsFilterJoinCacheRequest> {
 
-  public StatsFilterJoinCacheRequest() {}
+  public StatsFilterJoinCacheRequest() {
+    super((String[])null);
+  }
+
+  public StatsFilterJoinCacheRequest(StreamInput in) throws IOException {
+    super(in);
+  }
 
 }

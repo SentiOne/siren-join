@@ -20,7 +20,6 @@ package solutions.siren.join.rest;
 
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
@@ -33,8 +32,7 @@ import java.io.IOException;
 public class RestClearFilterJoinCacheAction extends BaseRestHandler {
 
   @Inject
-  public RestClearFilterJoinCacheAction(final Settings settings, final RestController controller) {
-    super(settings);
+  public RestClearFilterJoinCacheAction(final RestController controller) {
     controller.registerHandler(RestRequest.Method.POST, "/_filter_join/cache/clear", this);
     controller.registerHandler(RestRequest.Method.GET, "/_filter_join/cache/clear", this);
   }

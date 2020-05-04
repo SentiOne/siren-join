@@ -20,10 +20,7 @@ package solutions.siren.join.rest;
 
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.node.NodeClient;
-import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestRequest;
@@ -45,13 +42,12 @@ public class RestCoordinateSearchAction extends BaseRestHandler {
   private static final Set<String> RESPONSE_PARAMS;
 
   static {
-    final Set<String> responseParams = new HashSet<>(Arrays.asList(RestSearchAction.TYPED_KEYS_PARAM, RestSearchAction.TOTAL_HIT_AS_INT_PARAM));
+    final Set<String> responseParams = new HashSet<>(Arrays.asList(RestSearchAction.TYPED_KEYS_PARAM, RestSearchAction.TOTAL_HITS_AS_INT_PARAM));
     RESPONSE_PARAMS = Collections.unmodifiableSet(responseParams);
   }
 
   @Inject
-  public RestCoordinateSearchAction(final Settings settings, final RestController controller) {
-    super(settings);
+  public RestCoordinateSearchAction(final RestController controller) {
     controller.registerHandler(GET, "/_coordinate_search", this);
     controller.registerHandler(POST, "/_coordinate_search", this);
     controller.registerHandler(GET, "/{index}/_coordinate_search", this);

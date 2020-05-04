@@ -32,7 +32,9 @@ import java.util.List;
 
 public class StatsFilterJoinCacheResponse extends BaseNodesResponse<StatsFilterJoinCacheNodeResponse> implements ToXContentObject {
 
-  StatsFilterJoinCacheResponse() {}
+  StatsFilterJoinCacheResponse(StreamInput in) throws IOException {
+    super(in);
+  }
 
   StatsFilterJoinCacheResponse(ClusterName clusterName, List<StatsFilterJoinCacheNodeResponse> nodes, List<FailedNodeException> failures) {
     super(clusterName, nodes, failures);

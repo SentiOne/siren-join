@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.common.settings.Settings;
 import solutions.siren.join.action.coordinate.model.FilterJoinNode;
 import solutions.siren.join.action.coordinate.model.FilterJoinTerms;
@@ -135,12 +135,23 @@ public class FilterJoinCache {
 
   }
 
-  public static class FilterJoinCacheStats implements Streamable {
+  public static class FilterJoinCacheStats implements Writeable {
 
     private CacheStats cacheStats;
     private long size;
 
     public FilterJoinCacheStats() {}
+
+    public FilterJoinCacheStats(StreamInput in) throws IOException {
+      size = in.readVLong();
+      long hitCount = in.readVLong();
+      long misscount = in.readVLong();
+      long loadSuccessCount = in.readVLong();
+      long loadExceptionCount = in.readVLong();
+      long totalLoadTime = in.readVLong();
+      long evictionCount = in.readVLong();
+      cacheStats = new CacheStats(hitCount, misscount, loadSuccessCount, loadExceptionCount, totalLoadTime, evictionCount);
+    }
 
     public FilterJoinCacheStats(long size, CacheStats stats) {
       this.cacheStats = stats;
@@ -153,18 +164,6 @@ public class FilterJoinCache {
 
     public CacheStats getCacheStats() {
       return cacheStats;
-    }
-
-    @Override
-    public void readFrom(StreamInput in) throws IOException {
-      size = in.readVLong();
-      long hitCount = in.readVLong();
-      long misscount = in.readVLong();
-      long loadSuccessCount = in.readVLong();
-      long loadExceptionCount = in.readVLong();
-      long totalLoadTime = in.readVLong();
-      long evictionCount = in.readVLong();
-      cacheStats = new CacheStats(hitCount, misscount, loadSuccessCount, loadExceptionCount, totalLoadTime, evictionCount);
     }
 
     @Override

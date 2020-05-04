@@ -285,7 +285,7 @@ public class LongBloomFilter {
     }
 
     public int ramBytesUsed() {
-      return RamUsageEstimator.NUM_BYTES_LONG * data.length + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER + 16;
+      return Long.BYTES * data.length + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER + 16;
     }
 
   }

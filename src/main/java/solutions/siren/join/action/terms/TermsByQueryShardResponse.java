@@ -38,13 +38,6 @@ class TermsByQueryShardResponse extends BroadcastShardResponse {
   private final CircuitBreaker breaker;
 
   /**
-   * Default constructor
-   */
-  TermsByQueryShardResponse(final CircuitBreaker breaker) {
-    this.breaker = breaker;
-  }
-
-  /**
    * Main constructor
    *
    * @param shardId the id of the shard the request executed on
@@ -56,22 +49,9 @@ class TermsByQueryShardResponse extends BroadcastShardResponse {
     this.breaker = null;
   }
 
-  /**
-   * Gets the gathered terms.
-   *
-   * @return the {@link TermsSet}
-   */
-  public TermsSet getTerms() {
-    return this.termsSet;
-  }
-
-  /**
-   * Deserialize
-   */
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-
+  TermsByQueryShardResponse(final CircuitBreaker breaker, StreamInput in) throws IOException {
+    super(in);
+    this.breaker = breaker;
     TermsByQueryRequest.TermsEncoding termsEncoding = TermsByQueryRequest.TermsEncoding.values()[in.readVInt()];
     switch (termsEncoding) {
 
@@ -99,6 +79,15 @@ class TermsByQueryShardResponse extends BroadcastShardResponse {
         throw new IOException("[termsByQuery] Invalid type of terms encoding: " + termsEncoding.name());
 
     }
+  }
+
+  /**
+   * Gets the gathered terms.
+   *
+   * @return the {@link TermsSet}
+   */
+  public TermsSet getTerms() {
+    return this.termsSet;
   }
 
   /**

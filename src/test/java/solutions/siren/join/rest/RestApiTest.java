@@ -18,21 +18,15 @@
  */
 package solutions.siren.join.rest;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.common.bytes.BytesArray;
-import org.elasticsearch.common.network.NetworkModule;
-import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
-import org.elasticsearch.transport.Netty4Plugin;
 import solutions.siren.join.SirenJoinTestCase;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.rest.RestStatus;
 import org.junit.Test;
@@ -51,10 +45,8 @@ import static org.hamcrest.Matchers.equalTo;
 public class RestApiTest extends SirenJoinTestCase {
 
   @Override
-  protected Settings nodeSettings(int nodeOrdinal) {
-    return Settings.builder()
-      .put("force.http.enabled", true) // enable http for these tests
-      .put(super.nodeSettings(nodeOrdinal)).build();
+  protected boolean addMockHttpTransport() {
+    return false;
   }
 
   @Test
@@ -82,16 +74,20 @@ public class RestApiTest extends SirenJoinTestCase {
             )).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/index1/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(3));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(3));
 
     // Check uri search
-    response = getRestClient().performRequest("GET","/_coordinate_search", ImmutableMap.of("q", "tag:aaa"));
+    request = new Request("GET", "/_coordinate_search");
+    request.addParameter("q", "tag:aaa");
+    response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(2));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(2));
   }
 
   @Test
@@ -119,20 +115,22 @@ public class RestApiTest extends SirenJoinTestCase {
             )).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/index1/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/index1/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(3));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(3));
 
     indexRandom(true,
             client().prepareIndex("index1", "type", "5").setSource("id", "5", "foreign_key", new String[]{"5"}),
 
             client().prepareIndex("index2", "type", "5").setSource("id", "5", "tag", "aaa"));
 
-    response = getRestClient().performRequest("GET", "/index1/_coordinate_search", Collections.emptyMap(), body);
+    response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(4));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(4));
   }
 
   /**
@@ -159,20 +157,22 @@ public class RestApiTest extends SirenJoinTestCase {
                ).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/email/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/email/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(1));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(1));
 
     // Add missing md5 in ciapioutput
     indexRandom(true,
             client().prepareIndex("ciapioutput", "ciapioutput", "2").setSource("id", "2", "content_md5", "6aa71033aef3f529926fe3840c6c0a7e") );
 
     // It should now return an empty result set
-    response = getRestClient().performRequest("GET", "/email/_coordinate_search", Collections.emptyMap(), body);
+    response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(0));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(0));
   }
 
 
@@ -205,13 +205,15 @@ public class RestApiTest extends SirenJoinTestCase {
 
     HttpEntity entity = new NStringEntity(body, ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_msearch", Collections.emptyMap(), entity);
+    Request request = new Request("GET", "/_coordinate_msearch");
+    request.setEntity(entity);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
     ArrayList responses = (ArrayList) map.get("responses");
     assertThat(responses.size(), equalTo(2));
-    assertThat((Integer) ((Map) ((Map) responses.get(0)).get("hits")).get("total"), equalTo(3));
-    assertThat((Integer) ((Map) ((Map) responses.get(1)).get("hits")).get("total"), equalTo(3));
+    assertThat((Integer) ((Map) ((Map)((Map) responses.get(0)).get("hits")).get("total")).get("value"), equalTo(3));
+    assertThat((Integer) ((Map) ((Map)((Map) responses.get(1)).get("hits")).get("total")).get("value"), equalTo(3));
   }
 
   /**
@@ -238,10 +240,12 @@ public class RestApiTest extends SirenJoinTestCase {
     // Check behavior when filterjoin's query is null
     HttpEntity body = new NStringEntity("{\"query\":{\"bool\":{\"filter\":[{\"filterjoin\":{\"foreign_key\":{\"index\":\"index2\",\"type\":\"type\",\"path\":\"id\",\"query\":null}}}]}}}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(3));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(3));
   }
 
   @Test
@@ -274,11 +278,13 @@ public class RestApiTest extends SirenJoinTestCase {
                 ).orderBy(TermsByQueryRequest.Ordering.DOC_SCORE).maxTermsPerShard(1)).toString();
     HttpEntity body = new NStringEntity("{ \"query\" : " + q + "}", ContentType.APPLICATION_JSON);
 
-    Response response = getRestClient().performRequest("GET", "/_coordinate_search", Collections.emptyMap(), body);
+    Request request = new Request("GET", "/_coordinate_search");
+    request.setEntity(body);
+    Response response = getRestClient().performRequest(request);
     assertThat(response.getStatusLine().getStatusCode(), equalTo(RestStatus.OK.getStatus()));
     Map<String, Object> map = XContentHelper.convertToMap(new BytesArray(IOUtils.toByteArray(response.getEntity().getContent())), false).v2();
     // Only one document contains a odd document id as foreign key.
-    assertThat((Integer) ((Map) map.get("hits")).get("total"), equalTo(1));
+    assertThat((Integer) ((Map)((Map) map.get("hits")).get("total")).get("value"), equalTo(1));
   }
 
 }

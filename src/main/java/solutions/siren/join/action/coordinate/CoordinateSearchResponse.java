@@ -19,15 +19,11 @@
 package solutions.siren.join.action.coordinate;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.ShardSearchFailure;
+import org.elasticsearch.action.search.SearchResponseSections;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.rest.RestStatus;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.profile.SearchProfileShardResults;
 import solutions.siren.join.action.coordinate.execution.CoordinateSearchMetadata;
 
 import java.io.IOException;
@@ -46,6 +42,9 @@ public class CoordinateSearchResponse extends SearchResponse {
   private CoordinateSearchMetadata coordinateSearchMetadata;
 
   public CoordinateSearchResponse(SearchResponse response, CoordinateSearchMetadata metadata) {
+    super(new SearchResponseSections(response.getHits(), response.getAggregations(), response.getSuggest(),
+            response.isTimedOut(), response.isTerminatedEarly(), new SearchProfileShardResults(response.getProfileResults()), response.getNumReducePhases()),
+            response.getScrollId(), response.getTotalShards(), response.getSuccessfulShards(), response.getSkippedShards(), response.getTook().millis(), response.getShardFailures(), response.getClusters());
     this.searchResponse = response;
     this.coordinateSearchMetadata = metadata;
   }
@@ -54,71 +53,11 @@ public class CoordinateSearchResponse extends SearchResponse {
    * Constructor for {@link CoordinateSearchAction#newResponse()} and
    * deserialization in {@link CoordinateMultiSearchResponse.Item}.
    */
-  CoordinateSearchResponse() {}
+  CoordinateSearchResponse(StreamInput in) throws IOException {
+    super(in);
 
-  @Override
-  public RestStatus status() {
-    return searchResponse.status();
-  }
-
-  @Override
-  public SearchHits getHits() {
-    return searchResponse.getHits();
-  }
-
-  @Override
-  public Aggregations getAggregations() {
-    return searchResponse.getAggregations();
-  }
-
-  @Override
-  public Suggest getSuggest() {
-    return searchResponse.getSuggest();
-  }
-
-  @Override
-  public boolean isTimedOut() {
-    return searchResponse.isTimedOut();
-  }
-
-  @Override
-  public Boolean isTerminatedEarly() {
-    return searchResponse.isTerminatedEarly();
-  }
-
-  @Override
-  public TimeValue getTook() {
-    return searchResponse.getTook();
-  }
-
-  @Override
-  public int getTotalShards() {
-    return searchResponse.getTotalShards();
-  }
-
-  @Override
-  public int getSuccessfulShards() {
-    return searchResponse.getSuccessfulShards();
-  }
-
-  @Override
-  public int getFailedShards() {
-    return searchResponse.getFailedShards();
-  }
-
-  @Override
-  public ShardSearchFailure[] getShardFailures() {
-    return searchResponse.getShardFailures();
-  }
-
-  @Override
-  public String getScrollId() {
-    return searchResponse.getScrollId();
-  }
-
-  @Override
-  public void scrollId(String scrollId) {
-    searchResponse.scrollId(scrollId);
+    this.coordinateSearchMetadata = new CoordinateSearchMetadata();
+    this.coordinateSearchMetadata.readFrom(in);
   }
 
   @Override
@@ -126,7 +65,11 @@ public class CoordinateSearchResponse extends SearchResponse {
     builder.startObject();
 
     coordinateSearchMetadata.toXContent(builder);
-    this.searchResponse.innerToXContent(builder, params);
+    if (searchResponse != null) {
+      searchResponse.innerToXContent(builder, params);
+    } else {
+      super.innerToXContent(builder, params);
+    }
 
     builder.endObject();
 
@@ -134,17 +77,12 @@ public class CoordinateSearchResponse extends SearchResponse {
   }
 
   @Override
-  public void readFrom(StreamInput in) throws IOException {
-    this.searchResponse = new SearchResponse();
-    this.searchResponse.readFrom(in);
-
-    this.coordinateSearchMetadata = new CoordinateSearchMetadata();
-    this.coordinateSearchMetadata.readFrom(in);
-  }
-
-  @Override
   public void writeTo(StreamOutput out) throws IOException {
-    this.searchResponse.writeTo(out);
+    if (searchResponse != null) {
+      searchResponse.writeTo(out);
+    } else {
+      super.writeTo(out);
+    }
     this.coordinateSearchMetadata.writeTo(out);
   }
 

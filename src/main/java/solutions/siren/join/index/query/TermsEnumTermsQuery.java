@@ -152,7 +152,7 @@ public class TermsEnumTermsQuery extends Query implements Accountable {
   }
 
   @Override
-  public Weight createWeight(final IndexSearcher searcher, final boolean needsScores, float boost) throws IOException {
+  public Weight createWeight(final IndexSearcher searcher, final ScoreMode scoreMode, float boost) throws IOException {
     return new ConstantScoreWeight(new CacheKeyFieldDataTermsQuery(cacheKey), 0.0f) {
 
 		@Override
@@ -176,7 +176,7 @@ public class TermsEnumTermsQuery extends Query implements Accountable {
         if (disi == null) {
           return null;
         }
-        return new ConstantScoreScorer(this, score(), disi);
+        return new ConstantScoreScorer(this, score(), scoreMode, disi);
       }
 
       @Override

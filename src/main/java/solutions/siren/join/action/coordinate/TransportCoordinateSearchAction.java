@@ -24,16 +24,15 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.TransportSearchAction;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.cbor.CborXContent;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import solutions.siren.join.action.admin.cache.FilterJoinCacheService;
@@ -52,19 +51,18 @@ public class TransportCoordinateSearchAction extends BaseTransportCoordinateSear
   private final FilterJoinCacheService cacheService;
 
   @Inject
-  public TransportCoordinateSearchAction(Settings settings, ThreadPool threadPool,
+  public TransportCoordinateSearchAction(ThreadPool threadPool,
                                          TransportService transportService, FilterJoinCacheService cacheService,
                                          ActionFilters actionFilters, TransportSearchAction searchAction,
-                                         IndexNameExpressionResolver indexNameExpressionResolver, Client client,
-                                         NamedXContentRegistry xContentRegistry) {
-    super(settings, CoordinateSearchAction.NAME, threadPool, transportService, actionFilters,
-            indexNameExpressionResolver, client, xContentRegistry, SearchRequest::new);
+                                         Client client, NamedXContentRegistry xContentRegistry) {
+    super(CoordinateSearchAction.NAME, threadPool, transportService, actionFilters,
+            client, xContentRegistry, SearchRequest::new);
     this.searchAction = searchAction;
     this.cacheService = cacheService;
   }
 
   @Override
-  protected void doExecute(final SearchRequest request, final ActionListener<SearchResponse> listener) {
+  protected void doExecute(final Task task, final SearchRequest request, final ActionListener<SearchResponse> listener) {
     logger.debug("{}: Execute coordinated search action", Thread.currentThread().getName());
 
     // A reference to the listener that will be used - can be overwritten to reference a CoordinateSearchListener

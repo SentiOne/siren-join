@@ -21,7 +21,7 @@ package solutions.siren.join.action.admin.cache;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.client.ElasticsearchClient;
 
-public class ClearFilterJoinCacheRequestBuilder extends ActionRequestBuilder<ClearFilterJoinCacheRequest, ClearFilterJoinCacheResponse, ClearFilterJoinCacheRequestBuilder> {
+public class ClearFilterJoinCacheRequestBuilder extends ActionRequestBuilder<ClearFilterJoinCacheRequest, ClearFilterJoinCacheResponse> {
 
   public ClearFilterJoinCacheRequestBuilder(ElasticsearchClient client, ClearFilterJoinCacheAction action) {
     super(client, action, new ClearFilterJoinCacheRequest());

@@ -23,28 +23,21 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.support.ActionFilters;
-import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.TransportAction;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.collect.Tuple;
-import org.elasticsearch.common.io.stream.StreamInput;
-import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.common.xcontent.*;
-import org.elasticsearch.search.SearchModule;
-import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.tasks.TaskManager;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportChannel;
-import org.elasticsearch.transport.TransportRequest;
 import org.elasticsearch.transport.TransportRequestHandler;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Abstract class for coordinate search action which enforces {@link XContentType#CBOR} encoding of the content.
@@ -55,13 +48,13 @@ extends TransportAction<Request, Response> {
   protected final Client client;
   private final NamedXContentRegistry xContentRegistry;
 
-  protected BaseTransportCoordinateSearchAction(final Settings settings, final String actionName,
+  protected BaseTransportCoordinateSearchAction(final String actionName,
                                                 final ThreadPool threadPool, final TransportService transportService,
-                                                final ActionFilters actionFilters, final IndexNameExpressionResolver indexNameExpressionResolver,
-                                                final Client client, NamedXContentRegistry xContentRegistry, Supplier<Request> request) {
-    super(settings, actionName, threadPool, actionFilters, indexNameExpressionResolver, transportService.getTaskManager());
+                                                final ActionFilters actionFilters, final Client client,
+                                                NamedXContentRegistry xContentRegistry, Writeable.Reader<Request> request) {
+    super(actionName, actionFilters, transportService.getTaskManager());
     // Use the generic threadpool, as we can end up with deadlock with the SEARCH threadpool
-    transportService.registerRequestHandler(actionName, request, ThreadPool.Names.GENERIC, new TransportHandler());
+    transportService.registerRequestHandler(actionName, ThreadPool.Names.GENERIC, request, new TransportHandler());
     this.client = client;
     this.xContentRegistry = xContentRegistry;
   }
@@ -104,7 +97,7 @@ extends TransportAction<Request, Response> {
   class TransportHandler implements TransportRequestHandler<Request> {
 
     @Override
-    public final void messageReceived(final Request request, final TransportChannel channel) throws Exception {
+    public final void messageReceived(final Request request, final TransportChannel channel, final Task task) throws Exception {
       execute(request, new ActionListener<Response>() {
         @Override
         public void onResponse(Response response) {

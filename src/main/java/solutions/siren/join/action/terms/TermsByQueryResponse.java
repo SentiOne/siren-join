@@ -59,11 +59,6 @@ public class TermsByQueryResponse extends BroadcastResponse {
   private long tookInMillis;
 
   /**
-   * Default constructor
-   */
-  TermsByQueryResponse() {}
-
-  /**
    * Main constructor
    *
    * @param termsSet    the merged terms
@@ -81,6 +76,14 @@ public class TermsByQueryResponse extends BroadcastResponse {
     this.size = termsSet.size();
     this.isPruned = termsSet.isPruned();
     this.tookInMillis = tookInMillis;
+  }
+
+  TermsByQueryResponse(StreamInput in) throws IOException {
+    super(in);
+    isPruned = in.readBoolean();
+    size = in.readVInt();
+    termsEncoding = TermsByQueryRequest.TermsEncoding.values()[in.readVInt()];
+    encodedTerms = in.readBytesRef();
   }
 
   /**
@@ -111,22 +114,6 @@ public class TermsByQueryResponse extends BroadcastResponse {
    */
   public boolean isPruned() {
     return isPruned;
-  }
-
-  /**
-   * Deserialize
-   *
-   * @param in the input
-   * @throws IOException
-   */
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-
-    isPruned = in.readBoolean();
-    size = in.readVInt();
-    termsEncoding = TermsByQueryRequest.TermsEncoding.values()[in.readVInt()];
-    encodedTerms = in.readBytesRef();
   }
 
   /**

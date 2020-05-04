@@ -110,7 +110,7 @@ public class BitSetHitStream extends HitStream {
       return new LeafCollector() {
 
         @Override
-        public void setScorer(Scorer scorer) throws IOException {}
+        public void setScorer(Scorable scorer) throws IOException {}
 
         @Override
         public void collect(int doc) throws IOException {
@@ -122,8 +122,8 @@ public class BitSetHitStream extends HitStream {
     }
 
     @Override
-    public boolean needsScores() {
-      return false;
+    public ScoreMode scoreMode() {
+      return ScoreMode.COMPLETE_NO_SCORES;
     }
 
     /**

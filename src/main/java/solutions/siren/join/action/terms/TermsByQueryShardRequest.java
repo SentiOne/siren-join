@@ -18,7 +18,6 @@
  */
 package solutions.siren.join.action.terms;
 
-import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.support.broadcast.BroadcastShardRequest;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
@@ -43,6 +42,15 @@ public class TermsByQueryShardRequest extends BroadcastShardRequest {
    */
   public TermsByQueryShardRequest() {
     filteringAliases = new AliasFilter(null, Strings.EMPTY_ARRAY);
+  }
+
+  public TermsByQueryShardRequest(StreamInput in) throws IOException {
+    super(in);
+    request = new TermsByQueryRequest(in);
+
+    if (in.readBoolean()) {
+      filteringAliases = new AliasFilter(in);
+    }
   }
 
   /**
@@ -74,23 +82,6 @@ public class TermsByQueryShardRequest extends BroadcastShardRequest {
    */
   public TermsByQueryRequest request() {
     return request;
-  }
-
-  /**
-   * Deserialize
-   *
-   * @param in the input
-   * @throws IOException
-   */
-  @Override
-  public void readFrom(StreamInput in) throws IOException {
-    super.readFrom(in);
-    request = new TermsByQueryRequest();
-    request.readFrom(in);
-
-    if (in.readBoolean()) {
-      filteringAliases = new AliasFilter(in);
-    }
   }
 
   /**

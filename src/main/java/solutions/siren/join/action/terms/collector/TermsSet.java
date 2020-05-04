@@ -22,7 +22,7 @@ import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.breaker.CircuitBreaker;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.io.stream.Writeable;
 import solutions.siren.join.action.terms.TermsByQueryRequest;
 import solutions.siren.join.common.Bytes;
 
@@ -31,7 +31,7 @@ import java.io.IOException;
 /**
  * A set of terms.
  */
-public abstract class TermsSet implements Streamable {
+public abstract class TermsSet implements Writeable {
 
   /**
    * A flag to indicate if the set of terms has been pruned

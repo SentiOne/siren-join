@@ -75,7 +75,7 @@ public class SirenJoinPlugin extends Plugin implements ActionPlugin, SearchPlugi
       this.isEnabled = false;
     }
 
-    this.indexVersionService = isEnabled ? new IndexVersionService(settings) : null;
+    this.indexVersionService = isEnabled ? new IndexVersionService() : null;
   }
 
   @Override
@@ -119,10 +119,10 @@ public class SirenJoinPlugin extends Plugin implements ActionPlugin, SearchPlugi
                                           IndexScopedSettings indexScopedSettings, SettingsFilter settingsFilter,
                                           IndexNameExpressionResolver indexNameExpressionResolver, Supplier<DiscoveryNodes> nodesInCluster) {
     return Arrays.asList(
-      new RestCoordinateSearchAction(settings, restController),
+      new RestCoordinateSearchAction(restController),
       new RestCoordinateMultiSearchAction(settings, restController),
-      new RestClearFilterJoinCacheAction(settings, restController),
-      new RestStatsFilterJoinCacheAction(settings, restController)
+      new RestClearFilterJoinCacheAction(restController),
+      new RestStatsFilterJoinCacheAction(restController)
     );
   }
 
